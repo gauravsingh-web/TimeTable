@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>College Timetable Generator | ADA Project (Graph Coloring)</title>
+  <title>College Timetable Generator | ADA Project</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -30,22 +30,10 @@
         <span class="btn-text">Load DU FoT Demo Data</span>
       </button>
 
-      <!-- Run C++ Algorithm Button -->
+      <!-- Generate Timetable Button -->
       <button id="btnRunAlgorithm" class="btn btn-primary" title="Execute algorithm.exe (The Brain)">
         <span class="btn-icon">⚡</span>
-        <span class="btn-text">Run C++ Algorithm</span>
-      </button>
-
-      <!-- Manage Data (Sidebar Toggle) -->
-      <button id="btnOpenDrawer" class="btn btn-secondary" title="Add or Delete Teachers, Subjects & Rooms">
-        <span class="btn-icon">⚙️</span>
-        <span class="btn-text">Manage Database</span>
-      </button>
-
-      <!-- Algorithm Theory & Viva Modal -->
-      <button id="btnOpenTheory" class="btn btn-ghost" title="View Graph Coloring Theory & Viva Notes">
-        <span class="btn-icon">🎓</span>
-        <span class="btn-text">ADA Viva Notes</span>
+        <span class="btn-text">Generate Timetable</span>
       </button>
 
       <!-- Print Timetable -->
@@ -54,30 +42,6 @@
       </button>
     </div>
   </header>
-
-  <!-- Status Bar / Metrics Banner -->
-  <section class="metrics-bar">
-    <div class="metric-item">
-      <span class="metric-label">Algorithm:</span>
-      <span class="metric-val badge-indigo">Graph Coloring (Backtracking)</span>
-    </div>
-    <div class="metric-item">
-      <span class="metric-label">Execution Time:</span>
-      <span id="metricExecTime" class="metric-val text-mono">-- ms</span>
-    </div>
-    <div class="metric-item">
-      <span class="metric-label">Backtrack Steps:</span>
-      <span id="metricSteps" class="metric-val text-mono">--</span>
-    </div>
-    <div class="metric-item">
-      <span class="metric-label">Scheduled Lectures:</span>
-      <span id="metricLectures" class="metric-val text-mono">0</span>
-    </div>
-    <div class="metric-item">
-      <span class="metric-label">Hard Constraints:</span>
-      <span class="metric-val badge-green">0 Overlaps (Conflict-Free)</span>
-    </div>
-  </section>
 
   <!-- Main App Layout -->
   <main class="main-container">
@@ -138,191 +102,128 @@
       </div>
     </div>
 
+    <!-- Inline Data Management Section (Teachers, Subjects, Rooms) -->
+    <section class="management-section" id="dataManagementSection">
+      <div class="management-header">
+        <div class="management-title-group">
+          <div class="management-icon">⚙️</div>
+          <div>
+            <h3 class="management-title">Data Management</h3>
+            <p class="management-subtitle">Configure teachers, subjects, and classrooms stored in <code>data.json</code></p>
+          </div>
+        </div>
+        <button id="btnToggleManagement" class="btn btn-sm btn-secondary" title="Collapse / Expand Data Management">
+          <span id="toggleManagementIcon">▼</span> Toggle Section
+        </button>
+      </div>
+
+      <div class="management-body" id="managementBody">
+        <div class="management-grid">
+
+          <!-- Panel 1: Teachers -->
+          <div class="management-card">
+            <div class="card-header">
+              <div class="card-title-box">
+                <h4>👨‍🏫 Faculty Members</h4>
+                <span class="badge-count" id="teachersCount">0</span>
+              </div>
+            </div>
+
+            <form id="formAddTeacher" class="management-form">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="teacherIdInput">ID / Code</label>
+                  <input type="text" id="teacherIdInput" placeholder="e.g. JJ" required maxlength="10">
+                </div>
+                <div class="form-group flex-2">
+                  <label for="teacherNameInput">Full Name</label>
+                  <input type="text" id="teacherNameInput" placeholder="e.g. Dr. Juhi Jain" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Teacher</button>
+            </form>
+
+            <div class="list-wrapper">
+              <div class="items-list" id="teachersList"></div>
+            </div>
+          </div>
+
+          <!-- Panel 2: Subjects -->
+          <div class="management-card">
+            <div class="card-header">
+              <div class="card-title-box">
+                <h4>📚 Subjects & Assignments</h4>
+                <span class="badge-count" id="subjectsCount">0</span>
+              </div>
+            </div>
+
+            <form id="formAddSubject" class="management-form">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="subCodeInput">Subject Code</label>
+                  <input type="text" id="subCodeInput" placeholder="e.g. ADA" required maxlength="12">
+                </div>
+                <div class="form-group flex-2">
+                  <label for="subNameInput">Subject Name</label>
+                  <input type="text" id="subNameInput" placeholder="e.g. Design & Analysis of Algorithms" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="subBatchInput">Batch</label>
+                  <select id="subBatchInput" class="custom-select" required>
+                    <option value="CSE-A">CSE-A</option>
+                    <option value="CSE-B">CSE-B</option>
+                  </select>
+                </div>
+                <div class="form-group flex-2">
+                  <label for="subTeacherInput">Faculty</label>
+                  <select id="subTeacherInput" class="custom-select" required></select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="subLecturesInput">Classes/Wk</label>
+                  <input type="number" id="subLecturesInput" value="4" min="1" max="8" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Subject</button>
+            </form>
+
+            <div class="list-wrapper">
+              <div class="items-list" id="subjectsList"></div>
+            </div>
+          </div>
+
+          <!-- Panel 3: Classrooms -->
+          <div class="management-card">
+            <div class="card-header">
+              <div class="card-title-box">
+                <h4>🏢 Classrooms & Labs</h4>
+                <span class="badge-count" id="roomsCount">0</span>
+              </div>
+            </div>
+
+            <form id="formAddRoom" class="management-form">
+              <div class="form-row">
+                <div class="form-group flex-2">
+                  <label for="roomNameInput">Room Identifier</label>
+                  <input type="text" id="roomNameInput" placeholder="e.g. 314 or Basement Lab" required>
+                </div>
+                <div class="form-group flex-1" style="align-self: flex-end;">
+                  <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Room</button>
+                </div>
+              </div>
+            </form>
+
+            <div class="list-wrapper">
+              <div class="rooms-chips" id="roomsList"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
   </main>
-
-  <!-- Slide-out Drawer: Manage Database (Teachers, Subjects, Rooms) -->
-  <div class="drawer-overlay" id="drawerOverlay"></div>
-  <aside class="drawer" id="manageDrawer">
-    <div class="drawer-header">
-      <div class="drawer-title-box">
-        <h3>Database Management</h3>
-        <p>Edit teachers, subjects, and rooms stored in <code>data.json</code></p>
-      </div>
-      <button class="btn-close" id="btnCloseDrawer">&times;</button>
-    </div>
-
-    <!-- Drawer Tabs -->
-    <div class="drawer-tabs">
-      <button class="drawer-tab active" data-tab="tab-teachers">👨‍🏫 Teachers</button>
-      <button class="drawer-tab" data-tab="tab-subjects">📚 Subjects</button>
-      <button class="drawer-tab" data-tab="tab-rooms">🏢 Rooms</button>
-    </div>
-
-    <!-- Tab 1: Teachers -->
-    <div class="tab-content active" id="tab-teachers">
-      <form id="formAddTeacher" class="add-form">
-        <h4>Add Faculty Member</h4>
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label>Short Code / ID</label>
-            <input type="text" id="teacherIdInput" placeholder="e.g. JJ" required maxlength="10">
-          </div>
-          <div class="form-group flex-2">
-            <label>Full Name</label>
-            <input type="text" id="teacherNameInput" placeholder="e.g. Dr. Juhi Jain" required>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-sm btn-primary">+ Add Teacher</button>
-      </form>
-
-      <div class="items-list-container">
-        <h4>Existing Faculty (<span id="teachersCount">0</span>)</h4>
-        <div class="items-list" id="teachersList"></div>
-      </div>
-    </div>
-
-    <!-- Tab 2: Subjects -->
-    <div class="tab-content" id="tab-subjects">
-      <form id="formAddSubject" class="add-form">
-        <h4>Add Subject Assignment</h4>
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label>Subject Code</label>
-            <input type="text" id="subCodeInput" placeholder="e.g. ADA" required maxlength="12">
-          </div>
-          <div class="form-group flex-2">
-            <label>Subject Name</label>
-            <input type="text" id="subNameInput" placeholder="e.g. Design & Analysis of Algorithms" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label>Batch</label>
-            <select id="subBatchInput" class="custom-select" required>
-              <option value="CSE-A">CSE-A</option>
-              <option value="CSE-B">CSE-B</option>
-            </select>
-          </div>
-          <div class="form-group flex-2">
-            <label>Assigned Teacher</label>
-            <select id="subTeacherInput" class="custom-select" required>
-              <!-- Populated via JS -->
-            </select>
-          </div>
-          <div class="form-group flex-1">
-            <label>Weekly Classes</label>
-            <input type="number" id="subLecturesInput" value="4" min="1" max="8" required>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-sm btn-primary">+ Add Subject</button>
-      </form>
-
-      <div class="items-list-container">
-        <h4>Configured Subjects (<span id="subjectsCount">0</span>)</h4>
-        <div class="items-list" id="subjectsList"></div>
-      </div>
-    </div>
-
-    <!-- Tab 3: Rooms -->
-    <div class="tab-content" id="tab-rooms">
-      <form id="formAddRoom" class="add-form">
-        <h4>Add Classroom / Lab</h4>
-        <div class="form-row">
-          <div class="form-group flex-2">
-            <label>Room Identifier</label>
-            <input type="text" id="roomNameInput" placeholder="e.g. 314 or Basement Lab" required>
-          </div>
-          <div class="form-group flex-1" style="align-self: flex-end;">
-            <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Room</button>
-          </div>
-        </div>
-      </form>
-
-      <div class="items-list-container">
-        <h4>Available Classrooms (<span id="roomsCount">0</span>)</h4>
-        <div class="rooms-chips" id="roomsList"></div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Theory & ADA Viva Notes Modal -->
-  <div class="modal-overlay" id="theoryModalOverlay">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <div class="modal-title-box">
-          <h3>🎓 Design & Analysis of Algorithms (ADA) Theory</h3>
-          <p>Graph Vertex Coloring & Recursive Backtracking Explained</p>
-        </div>
-        <button class="btn-close" id="btnCloseTheory">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="theory-section">
-          <h4>1. Problem Formulation as Graph Vertex Coloring</h4>
-          <p>
-            University Timetabling is a known <strong>NP-Complete</strong> Constraint Satisfaction Problem (CSP).
-            We translate this real-world problem into graph theory:
-          </p>
-          <ul>
-            <li><strong>Vertices \(V\):</strong> Every individual lecture session during the week (e.g. 4 lectures of ADA for CSE-A = 4 distinct vertices).</li>
-            <li><strong>Edges \(E\) (Mutual Exclusion):</strong> An undirected edge \((u, v)\) is drawn if two lectures CANNOT occur at the same time:
-              <ul>
-                <li><strong>Batch Conflict:</strong> Lecture \(u\) and \(v\) belong to the same student cohort (e.g., CSE-A students cannot attend two classes at once).</li>
-                <li><strong>Teacher Conflict:</strong> Lecture \(u\) and \(v\) share the same faculty (e.g., Dr. Juhi Jain cannot teach CSE-A and CSE-B simultaneously).</li>
-              </ul>
-            </li>
-            <li><strong>Colors \(K\):</strong> Discrete weekly timeslots (5 days \(\times\) 8 periods = 40 available timeslots).</li>
-          </ul>
-        </div>
-
-        <div class="theory-section">
-          <h4>2. The Recursive Backtracking State-Space Tree</h4>
-          <p>The C++ engine (<code>algorithm.cpp</code>) uses Depth-First Search (DFS) with backtracking:</p>
-          <pre class="code-box"><code>bool solve(int vertexIndex) {
-    if (vertexIndex == totalVertices) return true; // Base Case: All colored!
-    
-    int v = vertexOrder[vertexIndex];
-    for (int color = 0; color &lt; TOTAL_TIMESLOTS; color++) {
-        for (int room = 0; room &lt; TOTAL_ROOMS; room++) {
-            if (isSafe(v, color, room)) {
-                assignedSlot[v] = color;  // Make Choice
-                assignedRoom[v] = room;
-                
-                if (solve(vertexIndex + 1)) return true; // Recurse
-                
-                assignedSlot[v] = -1;     // Backtrack (Undo Choice)
-                assignedRoom[v] = -1;
-            }
-        }
-    }
-    return false;
-}</code></pre>
-        </div>
-
-        <div class="theory-section">
-          <h4>3. Welsh-Powell Degree Ordering Heuristic</h4>
-          <p>
-            Standard backtracking can suffer from worst-case exponential time \(O(K^V)\).
-            To guarantee sub-millisecond execution, we order vertices by descending degree (number of conflicts).
-            Lectures with overlapping teachers (like Dr. Juhi Jain or Dr. Ahmad Zaman Khan) are scheduled <strong>first</strong>.
-            This "Most Constrained Variable" heuristic prunes invalid subtrees near the root!
-          </p>
-        </div>
-
-        <div class="theory-section">
-          <h4>4. Delhi University (Faculty of Technology) Setup</h4>
-          <p>
-            The demo data includes actual FoT CSE-A and CSE-B 3rd-semester faculty and subjects:
-            Dr. Juhi Jain (ADA), Dr. Geetanjali Bhola (DBMS), Dr. Bhawna Rawat (DSD), Dr. Ahmad Zaman Khan (PSCS & FIT INDIA),
-            Dr. Udita Sharma & Dr. Eklavya (EVS-2), Dr. Ashutosh Pandey (FIT INDIA), Mr. Ajay Kumar Sahu (FSS),
-            along with 8 lecture halls including Basement Lab and Rooms 214, 313, 314, 513.
-          </p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" id="btnOkTheory">Got it, Thanks!</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container"></div>
@@ -331,8 +232,8 @@
   <div id="loadingOverlay" class="loading-overlay">
     <div class="spinner-box">
       <div class="spinner"></div>
-      <h3 id="loadingText">Running C++ Backtracking Solver...</h3>
-      <p>Building conflict graph and coloring vertices</p>
+      <h3 id="loadingText">Generating Conflict-Free Timetable...</h3>
+      <p>Running C++ Graph Coloring & Backtracking Solver</p>
     </div>
   </div>
 

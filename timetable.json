@@ -3,7 +3,7 @@
   "meta": {
     "totalLectures": 38,
     "backtrackSteps": 39,
-    "executionTimeMs": 0.1182,
+    "executionTimeMs": 0.2668,
     "roomsAvailable": 8,
     "algorithm": "Graph Vertex Coloring (Recursive Backtracking)"
   },

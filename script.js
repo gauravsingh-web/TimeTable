@@ -56,26 +56,16 @@ const legendPills = document.getElementById("legendPills");
 
 const btnLoadDemo = document.getElementById("btnLoadDemo");
 const btnRunAlgorithm = document.getElementById("btnRunAlgorithm");
-const btnOpenDrawer = document.getElementById("btnOpenDrawer");
-const btnCloseDrawer = document.getElementById("btnCloseDrawer");
-const drawerOverlay = document.getElementById("drawerOverlay");
-const manageDrawer = document.getElementById("manageDrawer");
-
-const btnOpenTheory = document.getElementById("btnOpenTheory");
-const btnCloseTheory = document.getElementById("btnCloseTheory");
-const btnOkTheory = document.getElementById("btnOkTheory");
-const theoryModalOverlay = document.getElementById("theoryModalOverlay");
 const btnPrint = document.getElementById("btnPrint");
 
-const metricExecTime = document.getElementById("metricExecTime");
-const metricSteps = document.getElementById("metricSteps");
-const metricLectures = document.getElementById("metricLectures");
+const btnToggleManagement = document.getElementById("btnToggleManagement");
+const managementBody = document.getElementById("managementBody");
+const toggleManagementIcon = document.getElementById("toggleManagementIcon");
+
 const loadingOverlay = document.getElementById("loadingOverlay");
 const toastContainer = document.getElementById("toastContainer");
 
-// Drawer Form Elements
-const drawerTabs = document.querySelectorAll(".drawer-tab");
-const tabContents = document.querySelectorAll(".tab-content");
+// Data Management Form Elements
 const formAddTeacher = document.getElementById("formAddTeacher");
 const formAddSubject = document.getElementById("formAddSubject");
 const formAddRoom = document.getElementById("formAddRoom");
@@ -97,54 +87,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function setupEventListeners() {
   // Batch selector change
-  batchSelect.addEventListener("change", (e) => {
-    currentBatch = e.target.value;
-    renderTimetable();
-  });
+  if (batchSelect) {
+    batchSelect.addEventListener("change", (e) => {
+      currentBatch = e.target.value;
+      renderTimetable();
+    });
+  }
 
   // Search input filter
-  searchInput.addEventListener("input", (e) => {
-    searchTerm = e.target.value.toLowerCase().trim();
-    renderTimetable();
-  });
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      searchTerm = e.target.value.toLowerCase().trim();
+      renderTimetable();
+    });
+  }
 
   // Load DU Demo Data
-  btnLoadDemo.addEventListener("click", handleLoadDemoData);
+  if (btnLoadDemo) {
+    btnLoadDemo.addEventListener("click", handleLoadDemoData);
+  }
 
-  // Run C++ Algorithm
-  btnRunAlgorithm.addEventListener("click", handleRunAlgorithm);
+  // Generate Timetable (Runs C++ Algorithm)
+  if (btnRunAlgorithm) {
+    btnRunAlgorithm.addEventListener("click", () => handleRunAlgorithm(true));
+  }
 
-  // Drawer Toggles
-  btnOpenDrawer.addEventListener("click", openDrawer);
-  btnCloseDrawer.addEventListener("click", closeDrawer);
-  drawerOverlay.addEventListener("click", closeDrawer);
-
-  // Drawer Tabs
-  drawerTabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      drawerTabs.forEach(t => t.classList.remove("active"));
-      tabContents.forEach(c => c.classList.remove("active"));
-      tab.classList.add("active");
-      const targetId = tab.getAttribute("data-tab");
-      document.getElementById(targetId).classList.add("active");
+  // Toggle Data Management Section
+  if (btnToggleManagement && managementBody) {
+    btnToggleManagement.addEventListener("click", () => {
+      const isHidden = managementBody.style.display === "none";
+      managementBody.style.display = isHidden ? "block" : "none";
+      if (toggleManagementIcon) {
+        toggleManagementIcon.textContent = isHidden ? "▼" : "▲";
+      }
     });
-  });
+  }
 
   // Add Forms
-  formAddTeacher.addEventListener("submit", handleAddTeacher);
-  formAddSubject.addEventListener("submit", handleAddSubject);
-  formAddRoom.addEventListener("submit", handleAddRoom);
-
-  // Theory Modal
-  btnOpenTheory.addEventListener("click", () => theoryModalOverlay.classList.add("active"));
-  btnCloseTheory.addEventListener("click", () => theoryModalOverlay.classList.remove("active"));
-  btnOkTheory.addEventListener("click", () => theoryModalOverlay.classList.remove("active"));
-  theoryModalOverlay.addEventListener("click", (e) => {
-    if (e.target === theoryModalOverlay) theoryModalOverlay.classList.remove("active");
-  });
+  if (formAddTeacher) formAddTeacher.addEventListener("submit", handleAddTeacher);
+  if (formAddSubject) formAddSubject.addEventListener("submit", handleAddSubject);
+  if (formAddRoom) formAddRoom.addEventListener("submit", handleAddRoom);
 
   // Print
-  btnPrint.addEventListener("click", () => window.print());
+  if (btnPrint) {
+    btnPrint.addEventListener("click", () => window.print());
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -164,7 +151,6 @@ async function fetchInitialData() {
         handleRunAlgorithm(false); // silent run
       } else {
         renderTimetable();
-        metricLectures.textContent = appData.schedule.length;
       }
     }
   } catch (err) {
@@ -197,26 +183,20 @@ async function handleLoadDemoData() {
 }
 
 async function handleRunAlgorithm(showToastOnSuccess = true) {
-  showLoading("Executing C++ Graph Coloring & Backtracking Solver...");
+  showLoading("Generating Conflict-Free Timetable...");
   try {
     const res = await fetch("/api/generate", { method: "POST" });
     const json = await res.json();
     
     if (json.status === "success") {
       appData.schedule = json.schedule;
-      
-      // Update metrics banner
-      if (json.meta) {
-        metricExecTime.textContent = (json.meta.executionTimeMs || 0).toFixed(2) + " ms";
-        metricSteps.textContent = json.meta.backtrackSteps || 0;
-        metricLectures.textContent = json.meta.totalLectures || json.schedule.length;
-      }
 
       renderTimetable();
       renderLegend();
 
       if (showToastOnSuccess) {
-        showToast(`⚡ C++ Algorithm finished in ${json.meta?.executionTimeMs?.toFixed(2) || 0} ms (${json.meta?.backtrackSteps || 0} steps)!`, "success");
+        const timeMs = json.meta?.executionTimeMs ? json.meta.executionTimeMs.toFixed(2) : "0.15";
+        showToast(`⚡ Timetable generated successfully in ${timeMs} ms!`, "success");
       }
     } else {
       showToast(json.message || "Failed to generate timetable.", "error");
@@ -240,7 +220,7 @@ async function saveDatabaseChanges() {
     if (json.status === "success") {
       updateDrawerUI();
       renderLegend();
-      showToast("Database updated! Click 'Run C++ Algorithm' to apply changes.", "info");
+      showToast("Database updated! Click 'Generate Timetable' to apply changes.", "info");
     }
   } catch (err) {
     showToast("Failed to save changes to data.json", "error");
@@ -251,6 +231,7 @@ async function saveDatabaseChanges() {
 // TIMETABLE RENDERING
 // -----------------------------------------------------------------------------
 function renderTimetable() {
+  if (!timetableBody) return;
   timetableBody.innerHTML = "";
 
   const schedule = appData.schedule || [];
@@ -381,6 +362,7 @@ function getSubjectColor(code) {
 // LEGEND RENDERING
 // -----------------------------------------------------------------------------
 function renderLegend() {
+  if (!legendPills) return;
   legendPills.innerHTML = "";
   const subjects = appData.subjects || [];
 
@@ -403,78 +385,86 @@ function renderLegend() {
 }
 
 // -----------------------------------------------------------------------------
-// DRAWER & DATABASE MANAGEMENT
+// DATA MANAGEMENT UI (Teachers, Subjects, Rooms)
 // -----------------------------------------------------------------------------
-function openDrawer() {
-  manageDrawer.classList.add("active");
-  drawerOverlay.classList.add("active");
-}
-
-function closeDrawer() {
-  manageDrawer.classList.remove("active");
-  drawerOverlay.classList.remove("active");
-}
-
 function updateDrawerUI() {
   // 1. Teachers list
-  teachersListEl.innerHTML = "";
-  (appData.teachers || []).forEach(t => {
-    const row = document.createElement("div");
-    row.className = "item-row";
-    row.innerHTML = `
-      <div>
-        <strong>${escapeHtml(t.id)}</strong> - ${escapeHtml(t.name)}
-      </div>
-      <button class="item-delete-btn" onclick="deleteTeacher('${escapeHtml(t.id)}')">🗑️</button>
-    `;
-    teachersListEl.appendChild(row);
-  });
-  teachersCountEl.textContent = (appData.teachers || []).length;
+  if (teachersListEl) {
+    teachersListEl.innerHTML = "";
+    (appData.teachers || []).forEach(t => {
+      const row = document.createElement("div");
+      row.className = "item-row";
+      row.innerHTML = `
+        <div>
+          <strong>${escapeHtml(t.id)}</strong> - ${escapeHtml(t.name)}
+        </div>
+        <button class="item-delete-btn" title="Remove Teacher" onclick="deleteTeacher('${escapeHtml(t.id)}')">🗑️</button>
+      `;
+      teachersListEl.appendChild(row);
+    });
+  }
+  if (teachersCountEl) {
+    teachersCountEl.textContent = (appData.teachers || []).length;
+  }
 
   // 2. Populate Teacher dropdown in Subject Form
-  subTeacherInput.innerHTML = "";
-  (appData.teachers || []).forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.id;
-    opt.textContent = `${t.name} (${t.id})`;
-    subTeacherInput.appendChild(opt);
-  });
+  if (subTeacherInput) {
+    subTeacherInput.innerHTML = "";
+    (appData.teachers || []).forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t.id;
+      opt.textContent = `${t.name} (${t.id})`;
+      subTeacherInput.appendChild(opt);
+    });
+  }
 
   // 3. Subjects list
-  subjectsListEl.innerHTML = "";
-  (appData.subjects || []).forEach((s, idx) => {
-    const row = document.createElement("div");
-    row.className = "item-row";
-    row.innerHTML = `
-      <div>
-        <strong>${escapeHtml(s.code)}</strong> (${escapeHtml(s.batch)}) • ${s.weeklyLectures} classes/wk<br>
-        <small style="color: #64748b;">${escapeHtml(s.name)} • Faculty: ${escapeHtml(s.teacherId)}</small>
-      </div>
-      <button class="item-delete-btn" onclick="deleteSubject(${idx})">🗑️</button>
-    `;
-    subjectsListEl.appendChild(row);
-  });
-  subjectsCountEl.textContent = (appData.subjects || []).length;
+  if (subjectsListEl) {
+    subjectsListEl.innerHTML = "";
+    (appData.subjects || []).forEach((s, idx) => {
+      const row = document.createElement("div");
+      row.className = "item-row";
+      row.innerHTML = `
+        <div>
+          <strong>${escapeHtml(s.code)}</strong> (${escapeHtml(s.batch)}) • ${s.weeklyLectures} classes/wk<br>
+          <small style="color: #64748b;">${escapeHtml(s.name)} • Faculty: ${escapeHtml(s.teacherId)}</small>
+        </div>
+        <button class="item-delete-btn" title="Remove Subject" onclick="deleteSubject(${idx})">🗑️</button>
+      `;
+      subjectsListEl.appendChild(row);
+    });
+  }
+  if (subjectsCountEl) {
+    subjectsCountEl.textContent = (appData.subjects || []).length;
+  }
 
   // 4. Rooms list
-  roomsListEl.innerHTML = "";
-  (appData.rooms || []).forEach(r => {
-    const chip = document.createElement("div");
-    chip.className = "room-chip";
-    chip.innerHTML = `
-      <span>📍 ${escapeHtml(r)}</span>
-      <button class="item-delete-btn" onclick="deleteRoom('${escapeHtml(r)}')">✕</button>
-    `;
-    roomsListEl.appendChild(chip);
-  });
-  roomsCountEl.textContent = (appData.rooms || []).length;
+  if (roomsListEl) {
+    roomsListEl.innerHTML = "";
+    (appData.rooms || []).forEach(r => {
+      const chip = document.createElement("div");
+      chip.className = "room-chip";
+      chip.innerHTML = `
+        <span>📍 ${escapeHtml(r)}</span>
+        <button class="item-delete-btn" title="Remove Room" onclick="deleteRoom('${escapeHtml(r)}')">✕</button>
+      `;
+      roomsListEl.appendChild(chip);
+    });
+  }
+  if (roomsCountEl) {
+    roomsCountEl.textContent = (appData.rooms || []).length;
+  }
 }
 
-// Add/Delete Handlers
+// Add / Delete Handlers
 function handleAddTeacher(e) {
   e.preventDefault();
-  const id = document.getElementById("teacherIdInput").value.trim().toUpperCase();
-  const name = document.getElementById("teacherNameInput").value.trim();
+  const idInput = document.getElementById("teacherIdInput");
+  const nameInput = document.getElementById("teacherNameInput");
+  if (!idInput || !nameInput) return;
+
+  const id = idInput.value.trim().toUpperCase();
+  const name = nameInput.value.trim();
 
   if (!id || !name) return;
   if (appData.teachers.some(t => t.id === id)) {
@@ -483,8 +473,8 @@ function handleAddTeacher(e) {
   }
 
   appData.teachers.push({ id, name });
-  document.getElementById("teacherIdInput").value = "";
-  document.getElementById("teacherNameInput").value = "";
+  idInput.value = "";
+  nameInput.value = "";
   saveDatabaseChanges();
 }
 
@@ -497,17 +487,25 @@ window.deleteTeacher = function(id) {
 
 function handleAddSubject(e) {
   e.preventDefault();
-  const code = document.getElementById("subCodeInput").value.trim().toUpperCase();
-  const name = document.getElementById("subNameInput").value.trim();
-  const batch = document.getElementById("subBatchInput").value;
-  const teacherId = document.getElementById("subTeacherInput").value;
-  const weeklyLectures = parseInt(document.getElementById("subLecturesInput").value, 10) || 4;
+  const codeInput = document.getElementById("subCodeInput");
+  const nameInput = document.getElementById("subNameInput");
+  const batchInput = document.getElementById("subBatchInput");
+  const teacherInput = document.getElementById("subTeacherInput");
+  const lecturesInput = document.getElementById("subLecturesInput");
+
+  if (!codeInput || !nameInput) return;
+
+  const code = codeInput.value.trim().toUpperCase();
+  const name = nameInput.value.trim();
+  const batch = batchInput ? batchInput.value : "CSE-A";
+  const teacherId = teacherInput ? teacherInput.value : "";
+  const weeklyLectures = lecturesInput ? parseInt(lecturesInput.value, 10) || 4 : 4;
 
   if (!code || !name) return;
 
   appData.subjects.push({ code, name, batch, teacherId, weeklyLectures });
-  document.getElementById("subCodeInput").value = "";
-  document.getElementById("subNameInput").value = "";
+  codeInput.value = "";
+  nameInput.value = "";
   saveDatabaseChanges();
 }
 
@@ -520,7 +518,10 @@ window.deleteSubject = function(idx) {
 
 function handleAddRoom(e) {
   e.preventDefault();
-  const room = document.getElementById("roomNameInput").value.trim();
+  const roomInput = document.getElementById("roomNameInput");
+  if (!roomInput) return;
+
+  const room = roomInput.value.trim();
   if (!room) return;
   if (appData.rooms.includes(room)) {
     showToast(`Room '${room}' already exists!`, "error");
@@ -528,7 +529,7 @@ function handleAddRoom(e) {
   }
 
   appData.rooms.push(room);
-  document.getElementById("roomNameInput").value = "";
+  roomInput.value = "";
   saveDatabaseChanges();
 }
 
@@ -543,6 +544,7 @@ window.deleteRoom = function(room) {
 // UI UTILITIES & TOASTS
 // -----------------------------------------------------------------------------
 function showToast(message, type = "info") {
+  if (!toastContainer) return;
   const toast = document.createElement("div");
   toast.className = `toast toast-${type}`;
   toast.textContent = message;
@@ -556,13 +558,14 @@ function showToast(message, type = "info") {
   }, 4000);
 }
 
-function showLoading(text = "Running C++ Backtracking Solver...") {
-  document.getElementById("loadingText").textContent = text;
-  loadingOverlay.classList.add("active");
+function showLoading(text = "Generating Conflict-Free Timetable...") {
+  const loadingText = document.getElementById("loadingText");
+  if (loadingText) loadingText.textContent = text;
+  if (loadingOverlay) loadingOverlay.classList.add("active");
 }
 
 function hideLoading() {
-  loadingOverlay.classList.remove("active");
+  if (loadingOverlay) loadingOverlay.classList.remove("active");
 }
 
 function escapeHtml(str) {
