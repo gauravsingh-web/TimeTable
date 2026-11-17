@@ -1,0 +1,655 @@
+{
+  "batches": [
+    "CSE-A",
+    "CSE-B"
+  ],
+  "days": [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday"
+  ],
+  "timeslots": [
+    {
+      "slot": 0,
+      "name": "09:00 AM - 10:00 AM",
+      "isLunch": false
+    },
+    {
+      "slot": 1,
+      "name": "10:00 AM - 11:00 AM",
+      "isLunch": false
+    },
+    {
+      "slot": 2,
+      "name": "11:00 AM - 12:00 PM",
+      "isLunch": false
+    },
+    {
+      "slot": 3,
+      "name": "12:00 PM - 01:00 PM",
+      "isLunch": false
+    },
+    {
+      "slot": 4,
+      "name": "01:00 PM - 02:00 PM",
+      "isLunch": true
+    },
+    {
+      "slot": 5,
+      "name": "02:00 PM - 03:00 PM",
+      "isLunch": false
+    },
+    {
+      "slot": 6,
+      "name": "03:00 PM - 04:00 PM",
+      "isLunch": false
+    },
+    {
+      "slot": 7,
+      "name": "04:00 PM - 05:00 PM",
+      "isLunch": false
+    },
+    {
+      "slot": 8,
+      "name": "05:00 PM - 06:00 PM",
+      "isLunch": false
+    }
+  ],
+  "teachers": [
+    {
+      "id": "JJ",
+      "name": "Dr. Juhi Jain"
+    },
+    {
+      "id": "GB",
+      "name": "Dr. Geetanjali Bhola"
+    },
+    {
+      "id": "BR",
+      "name": "Dr. Bhawna Rawat"
+    },
+    {
+      "id": "AZK",
+      "name": "Dr. Ahmad Zaman Khan"
+    },
+    {
+      "id": "UDS",
+      "name": "Dr. Udita Sharma"
+    },
+    {
+      "id": "AP",
+      "name": "Dr. Ashutosh Pandey"
+    },
+    {
+      "id": "AKS",
+      "name": "Mr. Ajay Kumar Sahu"
+    },
+    {
+      "id": "EKL",
+      "name": "Dr. Eklavya"
+    }
+  ],
+  "subjects": [
+    {
+      "code": "ADA",
+      "name": "Design & Analysis of Algorithms",
+      "batch": "CSE-A",
+      "teacherId": "JJ",
+      "weeklyLectures": 4
+    },
+    {
+      "code": "DBMS",
+      "name": "Database Management Systems",
+      "batch": "CSE-A",
+      "teacherId": "GB",
+      "weeklyLectures": 4
+    },
+    {
+      "code": "DSD",
+      "name": "Digital System Design",
+      "batch": "CSE-A",
+      "teacherId": "BR",
+      "weeklyLectures": 4
+    },
+    {
+      "code": "PSCS-A",
+      "name": "Probability & Statistics for CS",
+      "batch": "CSE-A",
+      "teacherId": "AZK",
+      "weeklyLectures": 3
+    },
+    {
+      "code": "EVS-2",
+      "name": "Environmental Science - II",
+      "batch": "CSE-A",
+      "teacherId": "UDS",
+      "weeklyLectures": 2
+    },
+    {
+      "code": "FIT INDIA",
+      "name": "Fit India Movement",
+      "batch": "CSE-A",
+      "teacherId": "AP",
+      "weeklyLectures": 1
+    },
+    {
+      "code": "ADA",
+      "name": "Design & Analysis of Algorithms",
+      "batch": "CSE-B",
+      "teacherId": "JJ",
+      "weeklyLectures": 4
+    },
+    {
+      "code": "DBMS",
+      "name": "Database Management Systems",
+      "batch": "CSE-B",
+      "teacherId": "GB",
+      "weeklyLectures": 4
+    },
+    {
+      "code": "DSD",
+      "name": "Digital System Design",
+      "batch": "CSE-B",
+      "teacherId": "BR",
+      "weeklyLectures": 4
+    },
+    {
+      "code": "PSCS-B",
+      "name": "Probability & Statistics for CS",
+      "batch": "CSE-B",
+      "teacherId": "AZK",
+      "weeklyLectures": 3
+    },
+    {
+      "code": "FSS",
+      "name": "Full Stack Specialization",
+      "batch": "CSE-B",
+      "teacherId": "AKS",
+      "weeklyLectures": 2
+    },
+    {
+      "code": "EVS-2",
+      "name": "Environmental Science - II",
+      "batch": "CSE-B",
+      "teacherId": "EKL",
+      "weeklyLectures": 2
+    },
+    {
+      "code": "FIT INDIA",
+      "name": "Fit India Movement",
+      "batch": "CSE-B",
+      "teacherId": "AZK",
+      "weeklyLectures": 1
+    }
+  ],
+  "rooms": [
+    "R1",
+    "R2",
+    "R3",
+    "214",
+    "313",
+    "314",
+    "513",
+    "Basement Lab"
+  ],
+  "schedule": [
+    {
+      "batch": "CSE-A",
+      "subjectCode": "ADA",
+      "subjectName": "Design & Analysis of Algorithms",
+      "teacherId": "JJ",
+      "teacherName": "Dr. Juhi Jain",
+      "room": "R2",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 1,
+      "time": "10:00 AM - 11:00 AM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "ADA",
+      "subjectName": "Design & Analysis of Algorithms",
+      "teacherId": "JJ",
+      "teacherName": "Dr. Juhi Jain",
+      "room": "R2",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 0,
+      "time": "09:00 AM - 10:00 AM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "ADA",
+      "subjectName": "Design & Analysis of Algorithms",
+      "teacherId": "JJ",
+      "teacherName": "Dr. Juhi Jain",
+      "room": "R2",
+      "day": "Wednesday",
+      "dayIndex": 2,
+      "slotIndex": 0,
+      "time": "09:00 AM - 10:00 AM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "ADA",
+      "subjectName": "Design & Analysis of Algorithms",
+      "teacherId": "JJ",
+      "teacherName": "Dr. Juhi Jain",
+      "room": "R2",
+      "day": "Thursday",
+      "dayIndex": 3,
+      "slotIndex": 0,
+      "time": "09:00 AM - 10:00 AM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "DBMS",
+      "subjectName": "Database Management Systems",
+      "teacherId": "GB",
+      "teacherName": "Dr. Geetanjali Bhola",
+      "room": "R2",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 2,
+      "time": "11:00 AM - 12:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "DBMS",
+      "subjectName": "Database Management Systems",
+      "teacherId": "GB",
+      "teacherName": "Dr. Geetanjali Bhola",
+      "room": "R2",
+      "day": "Wednesday",
+      "dayIndex": 2,
+      "slotIndex": 2,
+      "time": "11:00 AM - 12:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "DBMS",
+      "subjectName": "Database Management Systems",
+      "teacherId": "GB",
+      "teacherName": "Dr. Geetanjali Bhola",
+      "room": "R2",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 0,
+      "time": "09:00 AM - 10:00 AM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "DBMS",
+      "subjectName": "Database Management Systems",
+      "teacherId": "GB",
+      "teacherName": "Dr. Geetanjali Bhola",
+      "room": "R2",
+      "day": "Thursday",
+      "dayIndex": 3,
+      "slotIndex": 2,
+      "time": "11:00 AM - 12:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "DSD",
+      "subjectName": "Digital System Design",
+      "teacherId": "BR",
+      "teacherName": "Dr. Bhawna Rawat",
+      "room": "R2",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 2,
+      "time": "11:00 AM - 12:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "DSD",
+      "subjectName": "Digital System Design",
+      "teacherId": "BR",
+      "teacherName": "Dr. Bhawna Rawat",
+      "room": "R2",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 1,
+      "time": "10:00 AM - 11:00 AM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "DSD",
+      "subjectName": "Digital System Design",
+      "teacherId": "BR",
+      "teacherName": "Dr. Bhawna Rawat",
+      "room": "R2",
+      "day": "Wednesday",
+      "dayIndex": 2,
+      "slotIndex": 1,
+      "time": "10:00 AM - 11:00 AM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "DSD",
+      "subjectName": "Digital System Design",
+      "teacherId": "BR",
+      "teacherName": "Dr. Bhawna Rawat",
+      "room": "R2",
+      "day": "Thursday",
+      "dayIndex": 3,
+      "slotIndex": 1,
+      "time": "10:00 AM - 11:00 AM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "PSCS-A",
+      "subjectName": "Probability & Statistics for CS",
+      "teacherId": "AZK",
+      "teacherName": "Dr. Ahmad Zaman Khan",
+      "room": "R1",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 5,
+      "time": "03:00 PM - 04:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "PSCS-A",
+      "subjectName": "Probability & Statistics for CS",
+      "teacherId": "AZK",
+      "teacherName": "Dr. Ahmad Zaman Khan",
+      "room": "R1",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 4,
+      "time": "02:00 PM - 03:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "PSCS-A",
+      "subjectName": "Probability & Statistics for CS",
+      "teacherId": "AZK",
+      "teacherName": "Dr. Ahmad Zaman Khan",
+      "room": "R1",
+      "day": "Wednesday",
+      "dayIndex": 2,
+      "slotIndex": 4,
+      "time": "02:00 PM - 03:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "EVS-2",
+      "subjectName": "Environmental Science - II",
+      "teacherId": "UDS",
+      "teacherName": "Dr. Udita Sharma",
+      "room": "R2",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 3,
+      "time": "12:00 PM - 01:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "EVS-2",
+      "subjectName": "Environmental Science - II",
+      "teacherId": "UDS",
+      "teacherName": "Dr. Udita Sharma",
+      "room": "R2",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 3,
+      "time": "12:00 PM - 01:00 PM"
+    },
+    {
+      "batch": "CSE-A",
+      "subjectCode": "FIT INDIA",
+      "subjectName": "Fit India Movement",
+      "teacherId": "AP",
+      "teacherName": "Dr. Ashutosh Pandey",
+      "room": "R2",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 4,
+      "time": "02:00 PM - 03:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "ADA",
+      "subjectName": "Design & Analysis of Algorithms",
+      "teacherId": "JJ",
+      "teacherName": "Dr. Juhi Jain",
+      "room": "R1",
+      "day": "Thursday",
+      "dayIndex": 3,
+      "slotIndex": 2,
+      "time": "11:00 AM - 12:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "ADA",
+      "subjectName": "Design & Analysis of Algorithms",
+      "teacherId": "JJ",
+      "teacherName": "Dr. Juhi Jain",
+      "room": "R1",
+      "day": "Wednesday",
+      "dayIndex": 2,
+      "slotIndex": 2,
+      "time": "11:00 AM - 12:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "ADA",
+      "subjectName": "Design & Analysis of Algorithms",
+      "teacherId": "JJ",
+      "teacherName": "Dr. Juhi Jain",
+      "room": "R1",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 2,
+      "time": "11:00 AM - 12:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "ADA",
+      "subjectName": "Design & Analysis of Algorithms",
+      "teacherId": "JJ",
+      "teacherName": "Dr. Juhi Jain",
+      "room": "R1",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 2,
+      "time": "11:00 AM - 12:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "DBMS",
+      "subjectName": "Database Management Systems",
+      "teacherId": "GB",
+      "teacherName": "Dr. Geetanjali Bhola",
+      "room": "R1",
+      "day": "Thursday",
+      "dayIndex": 3,
+      "slotIndex": 1,
+      "time": "10:00 AM - 11:00 AM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "DBMS",
+      "subjectName": "Database Management Systems",
+      "teacherId": "GB",
+      "teacherName": "Dr. Geetanjali Bhola",
+      "room": "R1",
+      "day": "Wednesday",
+      "dayIndex": 2,
+      "slotIndex": 1,
+      "time": "10:00 AM - 11:00 AM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "DBMS",
+      "subjectName": "Database Management Systems",
+      "teacherId": "GB",
+      "teacherName": "Dr. Geetanjali Bhola",
+      "room": "R1",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 1,
+      "time": "10:00 AM - 11:00 AM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "DBMS",
+      "subjectName": "Database Management Systems",
+      "teacherId": "GB",
+      "teacherName": "Dr. Geetanjali Bhola",
+      "room": "R1",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 1,
+      "time": "10:00 AM - 11:00 AM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "DSD",
+      "subjectName": "Digital System Design",
+      "teacherId": "BR",
+      "teacherName": "Dr. Bhawna Rawat",
+      "room": "R1",
+      "day": "Thursday",
+      "dayIndex": 3,
+      "slotIndex": 0,
+      "time": "09:00 AM - 10:00 AM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "DSD",
+      "subjectName": "Digital System Design",
+      "teacherId": "BR",
+      "teacherName": "Dr. Bhawna Rawat",
+      "room": "R1",
+      "day": "Wednesday",
+      "dayIndex": 2,
+      "slotIndex": 0,
+      "time": "09:00 AM - 10:00 AM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "DSD",
+      "subjectName": "Digital System Design",
+      "teacherId": "BR",
+      "teacherName": "Dr. Bhawna Rawat",
+      "room": "R1",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 0,
+      "time": "09:00 AM - 10:00 AM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "DSD",
+      "subjectName": "Digital System Design",
+      "teacherId": "BR",
+      "teacherName": "Dr. Bhawna Rawat",
+      "room": "R1",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 0,
+      "time": "09:00 AM - 10:00 AM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "PSCS-B",
+      "subjectName": "Probability & Statistics for CS",
+      "teacherId": "AZK",
+      "teacherName": "Dr. Ahmad Zaman Khan",
+      "room": "R1",
+      "day": "Wednesday",
+      "dayIndex": 2,
+      "slotIndex": 3,
+      "time": "12:00 PM - 01:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "PSCS-B",
+      "subjectName": "Probability & Statistics for CS",
+      "teacherId": "AZK",
+      "teacherName": "Dr. Ahmad Zaman Khan",
+      "room": "R1",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 3,
+      "time": "12:00 PM - 01:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "PSCS-B",
+      "subjectName": "Probability & Statistics for CS",
+      "teacherId": "AZK",
+      "teacherName": "Dr. Ahmad Zaman Khan",
+      "room": "R1",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 4,
+      "time": "02:00 PM - 03:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "FSS",
+      "subjectName": "Full Stack Specialization",
+      "teacherId": "AKS",
+      "teacherName": "Mr. Ajay Kumar Sahu",
+      "room": "R2",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 5,
+      "time": "03:00 PM - 04:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "FSS",
+      "subjectName": "Full Stack Specialization",
+      "teacherId": "AKS",
+      "teacherName": "Mr. Ajay Kumar Sahu",
+      "room": "R2",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 4,
+      "time": "02:00 PM - 03:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "EVS-2",
+      "subjectName": "Environmental Science - II",
+      "teacherId": "EKL",
+      "teacherName": "Dr. Eklavya",
+      "room": "R1",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 6,
+      "time": "04:00 PM - 05:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "EVS-2",
+      "subjectName": "Environmental Science - II",
+      "teacherId": "EKL",
+      "teacherName": "Dr. Eklavya",
+      "room": "R1",
+      "day": "Tuesday",
+      "dayIndex": 1,
+      "slotIndex": 5,
+      "time": "03:00 PM - 04:00 PM"
+    },
+    {
+      "batch": "CSE-B",
+      "subjectCode": "FIT INDIA",
+      "subjectName": "Fit India Movement",
+      "teacherId": "AZK",
+      "teacherName": "Dr. Ahmad Zaman Khan",
+      "room": "R1",
+      "day": "Monday",
+      "dayIndex": 0,
+      "slotIndex": 3,
+      "time": "12:00 PM - 01:00 PM"
+    }
+  ]
+}
