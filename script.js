@@ -3,16 +3,17 @@
  * College Timetable Generator - Frontend Controller (script.js)
  * ------------------------------------------------------------------------------
  * 100% Client-Side Architecture (Runs directly in browser / Vercel / Static Host)
- * Zero backend required: Graph Coloring & Backtracking algorithm implemented in JS.
+ * Includes Randomized Graph Coloring & Backtracking Solver with Degree Heuristic.
+ * Supports DU FoT 2nd-Year Batches: CSE-A, CSE-B, EE-A, ECE-A.
  * ==============================================================================
  */
 
 // -----------------------------------------------------------------------------
-// HARDCODED DU FoT 2ND-YEAR DEMO DATASET
-// Faculty of Technology, University of Delhi (CSE Department)
+// EXPANDED DU FoT 2ND-YEAR DEMO DATASET
+// Faculty of Technology, University of Delhi (CSE, EE & ECE Departments)
 // -----------------------------------------------------------------------------
 const DU_FOT_DEMO_DATA = {
-  batches: ["CSE-A", "CSE-B"],
+  batches: ["CSE-A", "CSE-B", "EE-A", "ECE-A"],
   days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
   teachers: [
     { id: "JJ", name: "Dr. Juhi Jain" },
@@ -22,7 +23,12 @@ const DU_FOT_DEMO_DATA = {
     { id: "UDS", name: "Dr. Udita Sharma" },
     { id: "AP", name: "Dr. Ashutosh Pandey" },
     { id: "AKS", name: "Mr. Ajay Kumar Sahu" },
-    { id: "EKL", name: "Dr. Eklavya" }
+    { id: "EKL", name: "Dr. Eklavya" },
+    { id: "SG", name: "Dr. Shubham Gupta" },
+    { id: "SW", name: "Dr. Sweta Rani" },
+    { id: "DRS", name: "Dr. Diptiranjan Samantray" },
+    { id: "DRB", name: "Prof. D.R. Bhaskar" },
+    { id: "ART", name: "Dr. Anuradha Tomar" }
   ],
   subjects: [
     // CSE-A Subjects
@@ -40,7 +46,19 @@ const DU_FOT_DEMO_DATA = {
     { code: "PSCS-B", name: "Probability & Statistics for CS", batch: "CSE-B", teacherId: "AZK", weeklyLectures: 3 },
     { code: "FSS", name: "Full Stack Specialization", batch: "CSE-B", teacherId: "AKS", weeklyLectures: 2 },
     { code: "EVS-2", name: "Environmental Science - II", batch: "CSE-B", teacherId: "EKL", weeklyLectures: 2 },
-    { code: "FIT INDIA", name: "Fit India Movement", batch: "CSE-B", teacherId: "AZK", weeklyLectures: 1 }
+    { code: "FIT INDIA", name: "Fit India Movement", batch: "CSE-B", teacherId: "AZK", weeklyLectures: 1 },
+
+    // EE-A Subjects
+    { code: "NBD", name: "Network Analysis & Design", batch: "EE-A", teacherId: "SG", weeklyLectures: 4 },
+    { code: "EM-I", name: "Electrical Machines - I", batch: "EE-A", teacherId: "SG", weeklyLectures: 4 },
+    { code: "EVS-2", name: "Environmental Science - II", batch: "EE-A", teacherId: "UDS", weeklyLectures: 2 },
+    { code: "VLSI", name: "VLSI Design & Technology", batch: "EE-A", teacherId: "SW", weeklyLectures: 4 },
+
+    // ECE-A Subjects
+    { code: "EDC", name: "Electronic Devices & Circuits", batch: "ECE-A", teacherId: "DRS", weeklyLectures: 4 },
+    { code: "NAS", name: "Network Analysis & Synthesis", batch: "ECE-A", teacherId: "DRB", weeklyLectures: 4 },
+    { code: "VLSI", name: "VLSI Design & Technology", batch: "ECE-A", teacherId: "SW", weeklyLectures: 4 },
+    { code: "IEHV", name: "Industrial Electronics & High Voltage", batch: "ECE-A", teacherId: "ART", weeklyLectures: 3 }
   ],
   rooms: ["R1", "R2", "R3", "214", "313", "314", "513", "Basement Lab"],
   schedule: []
@@ -81,6 +99,7 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 // Distinctive Color Palette for Subjects
 const SUBJECT_COLORS = {
+  // CSE
   "ADA": { bg: "#e0e7ff", border: "#4f46e5", text: "#312e81" },
   "DBMS": { bg: "#e0f2fe", border: "#0284c7", text: "#0369a1" },
   "DSD": { bg: "#dcfce7", border: "#059669", text: "#065f46" },
@@ -88,10 +107,18 @@ const SUBJECT_COLORS = {
   "PSCS-B": { bg: "#fef3c7", border: "#d97706", text: "#92400e" },
   "EVS-2": { bg: "#f3e8ff", border: "#9333ea", text: "#6b21a8" },
   "FIT INDIA": { bg: "#ffe4e6", border: "#e11d48", text: "#9f1239" },
-  "FSS": { bg: "#ccfbf1", border: "#0d9488", text: "#115e59" }
+  "FSS": { bg: "#ccfbf1", border: "#0d9488", text: "#115e59" },
+
+  // EE & ECE
+  "NBD": { bg: "#cffafe", border: "#0891b2", text: "#155e75" },
+  "EM-I": { bg: "#ffedd5", border: "#ea580c", text: "#9a3412" },
+  "VLSI": { bg: "#ede9fe", border: "#6366f1", text: "#3730a3" },
+  "EDC": { bg: "#fae8ff", border: "#c026d3", text: "#86198f" },
+  "NAS": { bg: "#d1fae5", border: "#10b981", text: "#065f46" },
+  "IEHV": { bg: "#fee2e2", border: "#dc2626", text: "#991b1b" }
 };
 
-const STORAGE_KEY = "du_fot_college_timetable_data";
+const STORAGE_KEY = "du_fot_college_timetable_data_v2";
 
 // -----------------------------------------------------------------------------
 // APP STATE
@@ -127,12 +154,26 @@ const teachersListEl = document.getElementById("teachersList");
 const subjectsListEl = document.getElementById("subjectsList");
 const roomsListEl = document.getElementById("roomsList");
 const subTeacherInput = document.getElementById("subTeacherInput");
+const subBatchInput = document.getElementById("subBatchInput");
 const teachersCountEl = document.getElementById("teachersCount");
 const subjectsCountEl = document.getElementById("subjectsCount");
 const roomsCountEl = document.getElementById("roomsCount");
 
 // -----------------------------------------------------------------------------
-// 🧠 GRAPH COLORING & BACKTRACKING SOLVER (Pure JavaScript Implementation)
+// UTILITY: Fisher-Yates Array Shuffle
+// -----------------------------------------------------------------------------
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+  return arr;
+}
+
+// -----------------------------------------------------------------------------
+// 🧠 GRAPH COLORING & BACKTRACKING SOLVER (With Shuffle / Randomization)
 // -----------------------------------------------------------------------------
 /**
  * Solves the Timetable Scheduling Problem using:
@@ -142,7 +183,11 @@ const roomsCountEl = document.getElementById("roomsCount");
  *    - Colors (K): Discrete weekly timeslots (40 total slots).
  * 2. Room Collision Constraint: No two lectures can share a room at the same time.
  * 3. Welsh-Powell Degree Ordering Heuristic: Most-constrained vertices colored first.
- * 4. State-Space Tree Exploration via Recursive Backtracking.
+ * 4. Timeslot Randomization (Shuffle): Candidate timeslots are shuffled before
+ *    testing assignments, ensuring classes are naturally distributed throughout
+ *    the week instead of clustering at 9:00 AM.
+ * 5. State-Space Tree Exploration with Backtracking & Safety Step Budget to
+ *    prevent infinite looping.
  */
 function solveTimetableInJS(data) {
   const startTime = performance.now();
@@ -206,20 +251,19 @@ function solveTimetableInJS(data) {
   }
 
   // 4. Welsh-Powell Degree Ordering Heuristic
-  // Sorting vertices descending by degree prunes 99.9% of invalid search paths!
   const vertexOrder = Array.from({ length: N }, (_, i) => i);
   vertexOrder.sort((a, b) => degree[b] - degree[a]);
 
   // State arrays: assigned timeslot color [0..39] and assigned room index
   const assignedSlot = new Int32Array(N).fill(-1);
   const assignedRoom = new Int32Array(N).fill(-1);
-  let backtrackSteps = 0;
+  let totalBacktrackSteps = 0;
 
   // 5. Constraint Verification (isSafe)
   function isSafe(v, candidateSlot, candidateRoom, enforceDailySpread) {
     const candidateDay = Math.floor(candidateSlot / SLOTS_PER_DAY);
 
-    // Hard Constraint: Mutual exclusion in conflict graph & room collision
+    // Hard Constraint: Conflict graph mutual exclusion & room collision
     for (let u = 0; u < N; u++) {
       if (assignedSlot[u] === candidateSlot) {
         // Teacher or Batch collision check
@@ -249,26 +293,39 @@ function solveTimetableInJS(data) {
     return true;
   }
 
-  // 6. Recursive Backtracking Solver
-  function solve(orderIdx, enforceDailySpread) {
-    backtrackSteps++;
+  // 6. Randomized Backtracking Engine with Step Limit
+  let stepCounter = 0;
+  function solve(orderIdx, enforceDailySpread, maxAllowedSteps) {
+    stepCounter++;
+    totalBacktrackSteps++;
+
+    // Safety guard against infinite loops
+    if (stepCounter > maxAllowedSteps) return false;
 
     // Base Case: All vertices colored and scheduled
     if (orderIdx === N) return true;
 
     const v = vertexOrder[orderIdx];
 
-    // Try candidate colors (timeslots)
-    for (let slot = 0; slot < TOTAL_TIMESLOTS; slot++) {
-      // Try candidate classrooms
-      for (let r = 0; r < totalRooms; r++) {
+    // 🎲 RANDOMIZATION:
+    // Generate and shuffle available timeslots for this vertex
+    const candidateSlots = Array.from({ length: TOTAL_TIMESLOTS }, (_, i) => i);
+    shuffleArray(candidateSlots);
+
+    // Shuffle available classrooms
+    const candidateRooms = Array.from({ length: totalRooms }, (_, i) => i);
+    shuffleArray(candidateRooms);
+
+    // Try randomized candidates
+    for (const slot of candidateSlots) {
+      for (const r of candidateRooms) {
         if (isSafe(v, slot, r, enforceDailySpread)) {
           // 1. Make choice
           assignedSlot[v] = slot;
           assignedRoom[v] = r;
 
           // 2. Recurse to next vertex
-          if (solve(orderIdx + 1, enforceDailySpread)) return true;
+          if (solve(orderIdx + 1, enforceDailySpread, maxAllowedSteps)) return true;
 
           // 3. Backtrack (Undo choice)
           assignedSlot[v] = -1;
@@ -279,25 +336,35 @@ function solveTimetableInJS(data) {
     return false;
   }
 
-  // Attempt 1: With pedagogical daily spread (max 1 class per subject per day)
-  let solved = solve(0, true);
+  // 7. Execution Strategy:
+  // Phase 1: Try with strict daily spread (up to 3 randomized restarts with a fresh shuffle)
+  let solved = false;
+  for (let restart = 0; restart < 3; restart++) {
+    assignedSlot.fill(-1);
+    assignedRoom.fill(-1);
+    stepCounter = 0;
+    if (solve(0, true, 10000)) {
+      solved = true;
+      break;
+    }
+  }
 
-  // Attempt 2: If strict 1-per-day cannot be satisfied, relax spread constraint
+  // Phase 2: If tight custom constraints prevent strict 1-per-day, relax spread constraint
   if (!solved) {
     assignedSlot.fill(-1);
     assignedRoom.fill(-1);
-    backtrackSteps = 0;
-    solved = solve(0, false);
+    stepCounter = 0;
+    solved = solve(0, false, 30000);
   }
 
   const endTime = performance.now();
   const executionTimeMs = endTime - startTime;
 
   if (!solved) {
-    return { solved: false, schedule: [], executionTimeMs, backtrackSteps };
+    return { solved: false, schedule: [], executionTimeMs, backtrackSteps: totalBacktrackSteps };
   }
 
-  // 7. Format output schedule
+  // 8. Format output schedule
   const schedule = [];
   for (let i = 0; i < N; i++) {
     const slot = assignedSlot[i];
@@ -317,7 +384,7 @@ function solveTimetableInJS(data) {
     });
   }
 
-  return { solved: true, schedule, executionTimeMs, backtrackSteps };
+  return { solved: true, schedule, executionTimeMs, backtrackSteps: totalBacktrackSteps };
 }
 
 // -----------------------------------------------------------------------------
@@ -328,14 +395,16 @@ function loadAppData() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && Array.isArray(parsed.teachers) && Array.isArray(parsed.subjects)) {
+      // Auto-upgrade if stored version lacks EE-A or ECE-A
+      const hasEE = parsed.batches && parsed.batches.includes("EE-A");
+      if (parsed && Array.isArray(parsed.teachers) && Array.isArray(parsed.subjects) && hasEE) {
         return parsed;
       }
     }
   } catch (e) {
     console.warn("Could not load from localStorage, falling back to demo data.", e);
   }
-  // Return fresh copy of DU FoT demo data
+  // Return fresh copy of expanded DU FoT demo data
   return JSON.parse(JSON.stringify(DU_FOT_DEMO_DATA));
 }
 
@@ -353,7 +422,7 @@ function saveAppData() {
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
 
-  // Load data from localStorage (or fallback to DU FoT default data)
+  // Load data from localStorage (or fallback to expanded demo data)
   appData = loadAppData();
 
   // If timetable hasn't been generated yet, generate it immediately!
@@ -388,7 +457,7 @@ function setupEventListeners() {
     btnLoadDemo.addEventListener("click", handleLoadDemoData);
   }
 
-  // Generate Timetable (Runs in-browser Graph Coloring Algorithm)
+  // Generate Timetable (Runs randomized in-browser Graph Coloring Algorithm)
   if (btnRunAlgorithm) {
     btnRunAlgorithm.addEventListener("click", () => runScheduleGeneration(true));
   }
@@ -416,12 +485,12 @@ function setupEventListeners() {
 }
 
 // -----------------------------------------------------------------------------
-// GENERATION & ACTIONS (No fetch() calls!)
+// GENERATION & ACTIONS
 // -----------------------------------------------------------------------------
 function runScheduleGeneration(showToastNotification = true) {
   showLoading("Generating Conflict-Free Timetable in Browser...");
 
-  // Small timeout allows DOM loading spinner to render cleanly
+  // Timeout allows DOM loading spinner to render cleanly
   setTimeout(() => {
     try {
       const result = solveTimetableInJS(appData);
@@ -436,7 +505,7 @@ function runScheduleGeneration(showToastNotification = true) {
 
         if (showToastNotification) {
           const time = result.executionTimeMs.toFixed(2);
-          showToast(`⚡ Conflict-free timetable generated in ${time} ms (${result.backtrackSteps} steps)!`, "success");
+          showToast(`⚡ Balanced timetable generated in ${time} ms (${result.backtrackSteps} steps)!`, "success");
         }
       } else {
         showToast("⚠️ Could not generate a conflict-free schedule. Try adding more rooms or adjusting classes.", "error");
@@ -451,7 +520,7 @@ function runScheduleGeneration(showToastNotification = true) {
 }
 
 function handleLoadDemoData() {
-  showLoading("Restoring DU Faculty of Technology Demo Data...");
+  showLoading("Restoring DU Faculty of Technology Demo Data (CSE, EE & ECE)...");
 
   setTimeout(() => {
     appData = JSON.parse(JSON.stringify(DU_FOT_DEMO_DATA));
@@ -462,7 +531,7 @@ function handleLoadDemoData() {
     renderLegend();
     hideLoading();
 
-    showToast("🏛️ DU FoT 2nd-Year Demo Data Loaded & Timetable Generated!", "success");
+    showToast("🏛️ DU FoT Demo Data (CSE, EE & ECE) Loaded & Generated!", "success");
   }, 40);
 }
 
@@ -528,10 +597,12 @@ function renderTimetable() {
           const sName = (item.subjectName || "").toLowerCase();
           const tName = (item.teacherName || "").toLowerCase();
           const room = (item.room || "").toLowerCase();
+          const bName = (item.batch || "").toLowerCase();
           matchSearch = sCode.includes(searchTerm) ||
                         sName.includes(searchTerm) ||
                         tName.includes(searchTerm) ||
-                        room.includes(searchTerm);
+                        room.includes(searchTerm) ||
+                        bName.includes(searchTerm);
         }
 
         return matchDay && matchTime && matchBatch && matchSearch;
