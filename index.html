@@ -288,12 +288,12 @@
             </div>
 
             <form id="formAddTeacher" class="management-form">
-              <div class="form-row">
-                <div class="form-group flex-1">
+              <div class="form-row form-row-faculty">
+                <div class="form-group">
                   <label for="teacherIdInput">Acronym / Code</label>
                   <input type="text" id="teacherIdInput" placeholder="e.g. ART or JJ" required maxlength="10">
                 </div>
-                <div class="form-group flex-2">
+                <div class="form-group">
                   <label for="teacherNameInput">Full Name & Title</label>
                   <input type="text" id="teacherNameInput" placeholder="e.g. Dr. Anuradha Tomar" required>
                 </div>
@@ -316,7 +316,7 @@
             </div>
 
             <form id="formAddSubject" class="management-form">
-              <div class="form-row">
+              <div class="form-row form-row-sub-name">
                 <div class="form-group flex-1">
                   <label for="subCodeInput">Subject Code</label>
                   <input type="text" id="subCodeInput" placeholder="e.g. ADA or ADA (P)" required maxlength="16">
@@ -325,14 +325,16 @@
                   <label for="subNameInput">Subject Name</label>
                   <input type="text" id="subNameInput" placeholder="e.g. Design & Analysis of Algorithms" required>
                 </div>
-                <div class="form-group flex-1">
+              </div>
+              <div class="form-row form-row-sub-specs">
+                <div class="form-group">
                   <label for="subSemesterInput">Semester</label>
                   <select id="subSemesterInput" class="custom-select" required>
                     <option value="odd" selected>Odd Semester</option>
                     <option value="even">Even Semester</option>
                   </select>
                 </div>
-                <div class="form-group flex-1">
+                <div class="form-group">
                   <label for="subTypeInput">Type (L-T-P)</label>
                   <select id="subTypeInput" class="custom-select" required>
                     <option value="L" selected>Theory (L)</option>
@@ -340,9 +342,17 @@
                     <option value="P">Practical Lab (P)</option>
                   </select>
                 </div>
+                <div class="form-group">
+                  <label for="subDurationInput">Duration (Hrs)</label>
+                  <input type="number" id="subDurationInput" value="1" min="1" max="4" title="Duration in consecutive hours" required>
+                </div>
+                <div class="form-group">
+                  <label for="subLecturesInput">Sessions/Wk</label>
+                  <input type="number" id="subLecturesInput" value="3" min="1" max="8" title="Number of weekly sessions" required>
+                </div>
               </div>
-              <div class="form-row">
-                <div class="form-group flex-1">
+              <div class="form-row form-row-sub-assign">
+                <div class="form-group">
                   <label for="subBatchInput">Batch / Section</label>
                   <select id="subBatchInput" class="custom-select" required>
                     <optgroup label="2nd Year Batches">
@@ -377,7 +387,7 @@
                     </optgroup>
                   </select>
                 </div>
-                <div class="form-group flex-1">
+                <div class="form-group">
                   <label for="subSectionInput">Sub-Section</label>
                   <select id="subSectionInput" class="custom-select" required>
                     <option value="All" selected>Whole Section</option>
@@ -385,17 +395,9 @@
                     <option value="A2">Group A2 / B2</option>
                   </select>
                 </div>
-                <div class="form-group flex-2">
-                  <label for="subTeacherInput">Faculty</label>
+                <div class="form-group">
+                  <label for="subTeacherInput">Faculty In-Charge</label>
                   <select id="subTeacherInput" class="custom-select" required></select>
-                </div>
-                <div class="form-group flex-1">
-                  <label for="subDurationInput">Duration</label>
-                  <input type="number" id="subDurationInput" value="1" min="1" max="4" title="Duration in consecutive hours" required>
-                </div>
-                <div class="form-group flex-1">
-                  <label for="subLecturesInput">Sessions/Wk</label>
-                  <input type="number" id="subLecturesInput" value="3" min="1" max="8" title="Number of weekly sessions" required>
                 </div>
               </div>
               <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Subject</button>
@@ -416,13 +418,13 @@
             </div>
 
             <form id="formAddRoom" class="management-form">
-              <div class="form-row">
-                <div class="form-group flex-2">
+              <div class="form-row form-row-room">
+                <div class="form-group flex-1">
                   <label for="roomNameInput">Room / Lab Identifier</label>
                   <input type="text" id="roomNameInput" placeholder="e.g. Basement Lab, 214, R1..." required>
                 </div>
-                <div class="form-group flex-1" style="align-self: flex-end;">
-                  <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Room</button>
+                <div class="form-group room-btn-group">
+                  <button type="submit" class="btn btn-sm btn-primary btn-add-room">+ Add Room</button>
                 </div>
               </div>
             </form>
