@@ -14,8 +14,8 @@
 // -----------------------------------------------------------------------------
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const DAYS_PER_WEEK = 5;
-const SLOTS_PER_DAY = 9; // 9 continuous hourly periods (09:00 AM - 06:00 PM)
-const TOTAL_TIMESLOTS = DAYS_PER_WEEK * SLOTS_PER_DAY; // 45 slots
+const SLOTS_PER_DAY = 8; // 8 continuous hourly periods (09:00 AM - 05:00 PM)
+const TOTAL_TIMESLOTS = DAYS_PER_WEEK * SLOTS_PER_DAY; // 40 slots
 
 const TIME_PERIODS = [
   { id: 0, label: "09:00 AM - 10:00 AM" },
@@ -25,8 +25,7 @@ const TIME_PERIODS = [
   { id: 4, label: "01:00 PM - 02:00 PM" },
   { id: 5, label: "02:00 PM - 03:00 PM" },
   { id: 6, label: "03:00 PM - 04:00 PM" },
-  { id: 7, label: "04:00 PM - 05:00 PM" },
-  { id: 8, label: "05:00 PM - 06:00 PM" }
+  { id: 7, label: "04:00 PM - 05:00 PM" }
 ];
 
 // Precompute valid starting slots for each block duration (ensures blocks never cross day boundaries)
@@ -57,7 +56,7 @@ const SUBJECT_COLORS = [
   { bg: "#f0fdf4", border: "#16a34a", text: "#14532d" }
 ];
 
-const STORAGE_KEY = "FOT_DU_TIMETABLE_V3_STORAGE";
+const STORAGE_KEY = "FOT_DU_TIMETABLE_V4_9TO5_STORAGE";
 
 // -----------------------------------------------------------------------------
 // EMBEDDED OFFICIAL DU FACULTY OF TECHNOLOGY DATASET
@@ -133,11 +132,6 @@ const DU_FOT_DEMO_DATA = {
     {
       "slot": 7,
       "name": "04:00 PM - 05:00 PM",
-      "isLunch": false
-    },
-    {
-      "slot": 8,
-      "name": "05:00 PM - 06:00 PM",
       "isLunch": false
     }
   ],
@@ -5061,7 +5055,7 @@ function analyzeConflictDiagnostics(data, targetSemester, blocks) {
   const bottlenecks = [];
   const semSubjects = (data.subjects || []).filter(s => (s.semester || "odd") === targetSemester);
 
-  // 1. Check Batch Overload (> 45 weekly hours is physically impossible)
+  // 1. Check Batch Overload (> 40 weekly hours is physically impossible for 9 AM - 5 PM)
   const batchHours = {};
   const batchLabs = {};
   semSubjects.forEach(s => {
@@ -5079,11 +5073,11 @@ function analyzeConflictDiagnostics(data, targetSemester, blocks) {
   });
 
   for (const [batch, hrs] of Object.entries(batchHours)) {
-    if (hrs > 40) {
+    if (hrs > 36) {
       bottlenecks.push({
         icon: "⚠️",
         title: `Heavy Cohort Load: ${batch} (${hrs} contact hrs/wk)`,
-        reason: `Cohort requested ${hrs} hours out of 45 maximum available periods (9 periods × 5 days). This leaves little flexibility for consecutive lab pairs.`,
+        reason: `Cohort requested ${hrs} hours out of 40 maximum available periods (8 periods × 5 days). This leaves little flexibility for consecutive lab pairs.`,
         recommendation: "Reduce weekly lecture counts or rebalance elective courses for this batch."
       });
     }
@@ -6851,9 +6845,31 @@ window.deleteRoom = function(room) {
 // -----------------------------------------------------------------------------
 function loadAppData() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      raw = localStorage.getItem("FOT_DU_TIMETABLE_V3_STORAGE") || localStorage.getItem("FOT_DU_TIMETABLE_V2_STORAGE");
+    }
     if (raw) {
       appData = JSON.parse(raw);
+
+      // Clean timeslots if present in saved dataset
+      if (Array.isArray(appData.timeslots)) {
+        appData.timeslots = appData.timeslots.filter(ts => ts.slot < SLOTS_PER_DAY && ts.name !== "05:00 PM - 06:00 PM" && ts.name !== "08:00 AM - 09:00 AM");
+      }
+
+      // Invalidate and clear any cached schedule containing slots outside 9:00 AM - 5:00 PM
+      const hasStaleSlots = (appData.schedule || []).some(item =>
+        item.slotIndex >= SLOTS_PER_DAY ||
+        item.time === "05:00 PM - 06:00 PM" ||
+        item.time === "08:00 AM - 09:00 AM" ||
+        (item.endPeriod !== undefined && item.endPeriod >= SLOTS_PER_DAY)
+      );
+
+      if (hasStaleSlots) {
+        console.warn("Cached timetable contains stale slots outside 9:00 AM - 5:00 PM. Resetting schedule for automatic 9 AM - 5 PM generation.");
+        appData.schedule = [];
+      }
+      saveAppData();
     } else {
       appData = JSON.parse(JSON.stringify(DU_FOT_DEMO_DATA));
       saveAppData();
