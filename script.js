@@ -4694,6 +4694,18 @@ const teachersListEl = document.getElementById("teachersList");
 const subjectsListEl = document.getElementById("subjectsList");
 const roomsListEl = document.getElementById("roomsList");
 
+// Fixed / Exception Rules Elements
+const formAddRule = document.getElementById("formAddRule");
+const rulesCount = document.getElementById("rulesCount");
+const rulesListEl = document.getElementById("rulesList");
+const ruleActionInput = document.getElementById("ruleActionInput");
+const ruleTargetTypeInput = document.getElementById("ruleTargetTypeInput");
+const ruleTargetValueInput = document.getElementById("ruleTargetValueInput");
+const ruleTargetLabel = document.getElementById("ruleTargetLabel");
+const ruleDayInput = document.getElementById("ruleDayInput");
+const ruleTimeInput = document.getElementById("ruleTimeInput");
+const ruleRoomInput = document.getElementById("ruleRoomInput");
+
 const subBatchInput = document.getElementById("subBatchInput");
 const subSectionInput = document.getElementById("subSectionInput");
 const subSemesterInput = document.getElementById("subSemesterInput");
@@ -4818,6 +4830,85 @@ function solveTimetableInJS(data, targetSemester = "odd") {
   const isBlockPinned = new Uint8Array(N);
   let totalSteps = 0;
 
+  // Active custom Fixed / Exception Rules
+  const activeRules = (data.fixedRules || []).filter(r => r.enabled !== false);
+  const fixRules = activeRules.filter(r => (r.action === "FIX_SLOT" || r.type === "FIX_SLOT"));
+  const blockRules = activeRules.filter(r => (r.action === "BLOCK_SLOT" || r.type === "BLOCK_SLOT"));
+  const ruleWarnings = [];
+
+  // 5. Multi-Period Constraint Verification (isSafe across full block)
+  function isSafe(v, candidateStartSlot, candidateRoom, enforceDailySpread) {
+    const dur_v = blocks[v].duration;
+    const day_v = Math.floor(candidateStartSlot / SLOTS_PER_DAY);
+    const p_v = candidateStartSlot % SLOTS_PER_DAY;
+
+    // Hard boundary check: Block must never exceed the daily periods limit
+    if (p_v + dur_v > SLOTS_PER_DAY) return false;
+
+    // Check active BLOCK_SLOT custom rules
+    for (const br of blockRules) {
+      if (br.day && br.day !== "ANY" && DAYS.indexOf(br.day) !== day_v) continue;
+
+      let timeOverlaps = true;
+      if (br.timeSlot && br.timeSlot !== "ANY") {
+        const bPeriod = TIME_PERIODS.findIndex(p => p.label === br.timeSlot);
+        if (bPeriod !== -1) {
+          timeOverlaps = (p_v <= bPeriod && bPeriod < p_v + dur_v);
+        }
+      }
+      if (!timeOverlaps) continue;
+
+      if (br.targetType === "faculty" && blocks[v].teacherId === br.targetValue) return false;
+      if (br.targetType === "batch" && blocks[v].batch === br.targetValue) return false;
+      if (br.targetType === "subject" && blocks[v].subjectCode === br.targetValue) return false;
+      if ((br.targetType === "room" && rooms[candidateRoom] === br.targetValue) || (br.room && br.room !== "ANY" && rooms[candidateRoom] === br.room)) {
+        return false;
+      }
+    }
+
+    // Check time interval overlap against all assigned blocks (both pinned, fixed, and dynamically allocated)
+    for (let u = 0; u < N; u++) {
+      if (assignedSlot[u] !== -1) {
+        const slot_u = assignedSlot[u];
+        const day_u = Math.floor(slot_u / SLOTS_PER_DAY);
+
+        if (day_u === day_v) {
+          const dur_u = blocks[u].duration;
+          const p_u = slot_u % SLOTS_PER_DAY;
+
+          // Check if time intervals [p_v, p_v + dur_v) and [p_u, p_u + dur_u) overlap
+          if (Math.max(p_v, p_u) < Math.min(p_v + dur_v, p_u + dur_u)) {
+            if (adj[v][u] === 1) return false;
+            if (assignedRoom[u] === candidateRoom) return false;
+          }
+        }
+      }
+    }
+
+    // Pedagogical Daily Spread Constraint
+    if (enforceDailySpread) {
+      let countToday = 0;
+      for (let u = 0; u < N; u++) {
+        if (assignedSlot[u] !== -1) {
+          if (Math.floor(assignedSlot[u] / SLOTS_PER_DAY) === day_v) {
+            if (blocks[u].batch === blocks[v].batch &&
+                blocks[u].subjectCode === blocks[v].subjectCode &&
+                blocks[u].subSection === blocks[v].subSection) {
+              countToday++;
+            }
+          }
+        }
+      }
+      const maxAllowed = (blocks[v].type === "P" || blocks[v].type === "T")
+        ? 1
+        : ((blocks[v].sessions > 5) ? 2 : 1);
+
+      if (countToday >= maxAllowed) return false;
+    }
+
+    return true;
+  }
+
   // 4b. Pre-Assign and Lock Pinned Sessions from data.schedule
   const pinnedItems = (data.schedule || []).filter(item => (item.semester || "odd") === targetSemester && item.pinned);
   const pinnedSessionsMap = new Map();
@@ -4862,62 +4953,82 @@ function solveTimetableInJS(data, targetSemester = "odd") {
     }
   });
 
+  // 4c. Pre-Assign Custom Fixed Rules (FIX_SLOT)
+  fixRules.forEach(r => {
+    let targetDayIdx = (r.day && r.day !== "ANY") ? DAYS.indexOf(r.day) : -1;
+    let targetPeriodIdx = (r.timeSlot && r.timeSlot !== "ANY") ? TIME_PERIODS.findIndex(p => p.label === r.timeSlot) : -1;
+
+    let matchedBlock = -1;
+    for (let b = 0; b < N; b++) {
+      if (isBlockPinned[b] === 1) continue;
+
+      let match = false;
+      if (r.targetType === "faculty" && blocks[b].teacherId === r.targetValue) match = true;
+      else if (r.targetType === "batch" && blocks[b].batch === r.targetValue) match = true;
+      else if (r.targetType === "subject" && blocks[b].subjectCode === r.targetValue) match = true;
+
+      if (match) {
+        matchedBlock = b;
+        break;
+      }
+    }
+
+    if (matchedBlock === -1) {
+      ruleWarnings.push(`No unallocated class found for rule: ${r.targetLabel || r.targetValue}`);
+      return;
+    }
+
+    const b = matchedBlock;
+    const dur = blocks[b].duration;
+
+    let candidateSlot = -1;
+    if (targetDayIdx !== -1 && targetPeriodIdx !== -1) {
+      if (targetPeriodIdx + dur <= SLOTS_PER_DAY) {
+        candidateSlot = targetDayIdx * SLOTS_PER_DAY + targetPeriodIdx;
+      } else {
+        ruleWarnings.push(`Fixed session ${blocks[b].subjectCode} exceeds daily schedule limit`);
+        return;
+      }
+    } else if (targetDayIdx !== -1) {
+      for (let p = 0; p + dur <= SLOTS_PER_DAY; p++) {
+        candidateSlot = targetDayIdx * SLOTS_PER_DAY + p;
+        break;
+      }
+    } else {
+      candidateSlot = 0;
+    }
+
+    let candidateRoom = -1;
+    if (r.room && r.room !== "ANY") {
+      candidateRoom = rooms.indexOf(r.room);
+      if (candidateRoom === -1) {
+        rooms.push(r.room);
+        candidateRoom = rooms.length - 1;
+      }
+    } else {
+      for (let ri = 0; ri < rooms.length; ri++) {
+        if (isSafe(b, candidateSlot, ri, false)) {
+          candidateRoom = ri;
+          break;
+        }
+      }
+      if (candidateRoom === -1) candidateRoom = 0;
+    }
+
+    if (isSafe(b, candidateSlot, candidateRoom, false)) {
+      assignedSlot[b] = candidateSlot;
+      assignedRoom[b] = candidateRoom;
+      isBlockPinned[b] = 1;
+      blocks[b].fixedByRule = r.id;
+    } else {
+      ruleWarnings.push(`Rule conflict: ${blocks[b].subjectCode} could not be placed in occupied slot/room`);
+    }
+  });
+
   // Filter vertices so that Welsh-Powell backtracking only allocates UNPINNED sessions
   const unpinnedVertices = vertexOrder.filter(v => isBlockPinned[v] === 0);
   const numUnpinned = unpinnedVertices.length;
   const totalRooms = rooms.length;
-
-  // 5. Multi-Period Constraint Verification (isSafe across full block)
-  function isSafe(v, candidateStartSlot, candidateRoom, enforceDailySpread) {
-    const dur_v = blocks[v].duration;
-    const day_v = Math.floor(candidateStartSlot / SLOTS_PER_DAY);
-    const p_v = candidateStartSlot % SLOTS_PER_DAY;
-
-    // Hard boundary check: Block must never exceed the 9 periods of that day
-    if (p_v + dur_v > SLOTS_PER_DAY) return false;
-
-    // Check time interval overlap against all assigned blocks (both pinned and dynamically allocated)
-    for (let u = 0; u < N; u++) {
-      if (assignedSlot[u] !== -1) {
-        const slot_u = assignedSlot[u];
-        const day_u = Math.floor(slot_u / SLOTS_PER_DAY);
-
-        if (day_u === day_v) {
-          const dur_u = blocks[u].duration;
-          const p_u = slot_u % SLOTS_PER_DAY;
-
-          // Check if time intervals [p_v, p_v + dur_v) and [p_u, p_u + dur_u) overlap
-          if (Math.max(p_v, p_u) < Math.min(p_v + dur_v, p_u + dur_u)) {
-            if (adj[v][u] === 1) return false;
-            if (assignedRoom[u] === candidateRoom) return false;
-          }
-        }
-      }
-    }
-
-    // Pedagogical Daily Spread Constraint
-    if (enforceDailySpread) {
-      let countToday = 0;
-      for (let u = 0; u < N; u++) {
-        if (assignedSlot[u] !== -1) {
-          if (Math.floor(assignedSlot[u] / SLOTS_PER_DAY) === day_v) {
-            if (blocks[u].batch === blocks[v].batch &&
-                blocks[u].subjectCode === blocks[v].subjectCode &&
-                blocks[u].subSection === blocks[v].subSection) {
-              countToday++;
-            }
-          }
-        }
-      }
-      const maxAllowed = (blocks[v].type === "P" || blocks[v].type === "T")
-        ? 1
-        : ((blocks[v].sessions > 5) ? 2 : 1);
-
-      if (countToday >= maxAllowed) return false;
-    }
-
-    return true;
-  }
 
   // 6. Randomized Backtracking Engine for Unpinned Blocks
   let stepCounter = 0;
@@ -4985,7 +5096,7 @@ function solveTimetableInJS(data, targetSemester = "odd") {
 
   if (!solved) {
     const diagnostics = analyzeConflictDiagnostics(data, targetSemester, blocks);
-    return { solved: false, schedule: [], executionTimeMs, backtrackSteps: totalSteps, diagnostics };
+    return { solved: false, schedule: [], executionTimeMs, backtrackSteps: totalSteps, ruleWarnings, diagnostics };
   }
 
   // 8. Format Output Schedule (Preserving Pinned Flag)
@@ -5025,7 +5136,8 @@ function solveTimetableInJS(data, targetSemester = "odd") {
         timeRange: timeRangeStr,
         isLab: (blocks[i].type === "P"),
         semester: targetSemester,
-        pinned: (isBlockPinned[i] === 1)
+        pinned: (isBlockPinned[i] === 1),
+        fixedByRule: blocks[i].fixedByRule || null
       });
     }
   }
@@ -5035,6 +5147,7 @@ function solveTimetableInJS(data, targetSemester = "odd") {
     schedule: schedule,
     executionTimeMs: executionTimeMs,
     backtrackSteps: totalSteps,
+    ruleWarnings: ruleWarnings,
     diagnostics: []
   };
 }
@@ -5415,6 +5528,7 @@ function handleImportJSON(event) {
 
       setTimeout(() => {
         appData = parsed;
+        if (!Array.isArray(appData.fixedRules)) appData.fixedRules = [];
 
         // If no schedule present in imported JSON, generate conflict-free schedule immediately
         if (!Array.isArray(appData.schedule) || appData.schedule.length === 0) {
@@ -5460,8 +5574,12 @@ function handleImportJSON(event) {
 // -----------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   loadAppData();
+  if (!Array.isArray(appData.fixedRules)) appData.fixedRules = [];
   populateFacultySelect();
   populateRoomSelect();
+  updateRuleTargetOptions();
+  updateRuleRoomOptions();
+  renderRulesList();
   setupEventListeners();
 
   if (!appData.schedule || appData.schedule.length === 0) {
@@ -5695,6 +5813,28 @@ function setupEventListeners() {
   if (formAddTeacher) formAddTeacher.addEventListener("submit", handleAddTeacher);
   if (formAddSubject) formAddSubject.addEventListener("submit", handleAddSubject);
   if (formAddRoom) formAddRoom.addEventListener("submit", handleAddRoom);
+  if (formAddRule) formAddRule.addEventListener("submit", handleAddRule);
+
+  if (ruleTargetTypeInput) {
+    ruleTargetTypeInput.addEventListener("change", updateRuleTargetOptions);
+  }
+
+  // Event Delegation for Rules List (Toggle and Delete)
+  if (rulesListEl) {
+    rulesListEl.addEventListener("click", (e) => {
+      const delBtn = e.target.closest(".btn-delete-rule");
+      if (delBtn) {
+        e.stopPropagation();
+        window.deleteRule(delBtn.dataset.ruleId);
+        return;
+      }
+
+      const toggleBox = e.target.closest(".rule-toggle-checkbox");
+      if (toggleBox) {
+        window.toggleRule(toggleBox.dataset.ruleId);
+      }
+    });
+  }
 
   // Print (prepares print sheet metadata before opening system print dialog)
   if (btnPrint) {
@@ -5801,11 +5941,16 @@ function runScheduleGeneration(showToastNotification = true) {
         updateStatusBar(false);
         renderDiagnostics([]);
 
-        if (showToastNotification) {
+        if (result.ruleWarnings && result.ruleWarnings.length > 0) {
+          showToast(`⚠️ ${result.ruleWarnings[0]}`, "warning");
+        } else if (showToastNotification) {
           const time = result.executionTimeMs.toFixed(2);
           showToast(`⚡ Conflict-free timetable generated in ${time} ms!`, "success");
         }
       } else {
+        if (result.ruleWarnings && result.ruleWarnings.length > 0) {
+          showToast(`⚠️ Rule collision: ${result.ruleWarnings[0]}`, "error");
+        }
         updateStatusBar(true, "Constraints unfeasible");
         renderDiagnostics(result.diagnostics);
         showToast("⚠️ Could not satisfy all constraints. Actionable diagnostics displayed above.", "error");
@@ -5897,7 +6042,51 @@ function renderTimetable() {
       });
 
       if (matching.length === 0) {
+        const activeBlockRules = (appData.fixedRules || []).filter(r => r.enabled !== false && (r.action === "BLOCK_SLOT" || r.type === "BLOCK_SLOT"));
+        let isSlotBlocked = false;
+        let blockedReason = "";
+
         if (currentViewMode === "room") {
+          const ruleMatch = activeBlockRules.find(r => 
+            (r.day === "ANY" || r.day === day) &&
+            (r.timeSlot === "ANY" || r.timeSlot === period.label) &&
+            (r.targetType === "room" ? r.targetValue === currentRoom : (r.room !== "ANY" && r.room === currentRoom))
+          );
+          if (ruleMatch) {
+            isSlotBlocked = true;
+            blockedReason = "Facility Reserved / Blocked";
+          }
+        } else if (currentViewMode === "faculty") {
+          const ruleMatch = activeBlockRules.find(r => 
+            (r.day === "ANY" || r.day === day) &&
+            (r.timeSlot === "ANY" || r.timeSlot === period.label) &&
+            (r.targetType === "faculty" && r.targetValue === currentFaculty)
+          );
+          if (ruleMatch) {
+            isSlotBlocked = true;
+            blockedReason = "Faculty Unavailable";
+          }
+        } else if (currentViewMode === "batch" && currentBatch !== "ALL") {
+          const ruleMatch = activeBlockRules.find(r => 
+            (r.day === "ANY" || r.day === day) &&
+            (r.timeSlot === "ANY" || r.timeSlot === period.label) &&
+            (r.targetType === "batch" && r.targetValue === currentBatch)
+          );
+          if (ruleMatch) {
+            isSlotBlocked = true;
+            blockedReason = "Cohort Blocked / Reserved";
+          }
+        }
+
+        if (isSlotBlocked) {
+          tdDay.innerHTML = `
+            <div class="room-blocked-cell">
+              <span class="room-blocked-badge">
+                ⛔ ${escapeHtml(blockedReason)}
+              </span>
+            </div>
+          `;
+        } else if (currentViewMode === "room") {
           tdDay.innerHTML = `
             <div class="room-free-cell">
               <span class="room-free-badge">
@@ -5944,6 +6133,7 @@ function renderTimetable() {
           }
 
           const pinStatusPill = isPinned ? `<span class="pin-status-pill">🔒 Pinned</span>` : "";
+          const ruleFixedPill = item.fixedByRule ? `<span class="rule-fixed-pill" title="Locked by custom scheduling rule">🔒 Rule Fixed</span>` : "";
 
           let blockBadge = "";
           if (item.isLab && item.duration > 1) {
@@ -5977,6 +6167,7 @@ function renderTimetable() {
                 <div class="lecture-tags">
                   ${badgePills}
                   ${pinStatusPill}
+                  ${ruleFixedPill}
                 </div>
               </div>
               <button type="button" class="btn-pin-slot${isPinned ? " pinned" : ""}" data-item-id="${escapeHtml(item.id)}" title="${isPinned ? "Unlock / Unpin this slot (will move dynamically during regeneration)" : "Lock / Pin this slot (fixes day, time, & room during regeneration)"}">
@@ -6641,6 +6832,10 @@ function updateLegendTabs() {
 // -----------------------------------------------------------------------------
 function updateManagementUI() {
   if (!appData) return;
+  if (!Array.isArray(appData.fixedRules)) appData.fixedRules = [];
+  updateRuleTargetOptions();
+  updateRuleRoomOptions();
+  renderRulesList();
 
   // 1. Teachers list
   if (teachersListEl) {
@@ -6839,6 +7034,184 @@ window.deleteRoom = function(room) {
     showToast(`Removed room ${room}`, "info");
   }
 };
+
+// -----------------------------------------------------------------------------
+// FIXED / EXCEPTION RULES BUILDER CONTROLLERS
+// -----------------------------------------------------------------------------
+function updateRuleTargetOptions() {
+  if (!ruleTargetTypeInput || !ruleTargetValueInput || !appData) return;
+  const tType = ruleTargetTypeInput.value;
+  ruleTargetValueInput.innerHTML = "";
+
+  if (ruleTargetLabel) {
+    if (tType === "faculty") ruleTargetLabel.textContent = "Select Faculty Member";
+    else if (tType === "batch") ruleTargetLabel.textContent = "Select Batch / Section";
+    else if (tType === "subject") ruleTargetLabel.textContent = "Select Subject / Course";
+    else if (tType === "room") ruleTargetLabel.textContent = "Select Classroom / Lab";
+  }
+
+  if (tType === "faculty") {
+    const teachers = (appData.teachers || []).slice();
+    teachers.sort((a, b) => a.name.localeCompare(b.name));
+    teachers.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t.id;
+      opt.textContent = `${t.name} [${t.id}]`;
+      ruleTargetValueInput.appendChild(opt);
+    });
+  } else if (tType === "batch") {
+    const semSubjects = (appData.subjects || []).filter(s => (s.semester || "odd") === currentSemester);
+    const batchSet = new Set(semSubjects.map(s => s.batch));
+    (appData.batches || []).forEach(b => batchSet.add(b));
+    const batches = Array.from(batchSet).sort();
+    batches.forEach(b => {
+      const opt = document.createElement("option");
+      opt.value = b;
+      opt.textContent = b;
+      ruleTargetValueInput.appendChild(opt);
+    });
+  } else if (tType === "subject") {
+    const semSubjects = (appData.subjects || []).filter(s => (s.semester || "odd") === currentSemester);
+    const subMap = new Map();
+    semSubjects.forEach(s => {
+      if (!subMap.has(s.code)) subMap.set(s.code, `${s.code} - ${s.name}`);
+    });
+    const subCodes = Array.from(subMap.keys()).sort();
+    subCodes.forEach(code => {
+      const opt = document.createElement("option");
+      opt.value = code;
+      opt.textContent = subMap.get(code);
+      ruleTargetValueInput.appendChild(opt);
+    });
+  } else if (tType === "room") {
+    const rooms = (appData.rooms || []).slice().sort();
+    rooms.forEach(r => {
+      const opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = r.includes("Lab") ? r : `Room ${r}`;
+      ruleTargetValueInput.appendChild(opt);
+    });
+  }
+}
+
+function updateRuleRoomOptions() {
+  if (!ruleRoomInput || !appData) return;
+  const currentVal = ruleRoomInput.value;
+  ruleRoomInput.innerHTML = `<option value="ANY" selected>Any Available Room</option>`;
+  const rooms = (appData.rooms || []).slice().sort();
+  rooms.forEach(r => {
+    const opt = document.createElement("option");
+    opt.value = r;
+    opt.textContent = r.includes("Lab") ? r : `Room ${r}`;
+    ruleRoomInput.appendChild(opt);
+  });
+  if (currentVal) ruleRoomInput.value = currentVal;
+}
+
+function renderRulesList() {
+  if (!rulesListEl || !appData) return;
+  if (!Array.isArray(appData.fixedRules)) appData.fixedRules = [];
+
+  rulesListEl.innerHTML = "";
+  if (rulesCount) rulesCount.textContent = appData.fixedRules.length;
+
+  if (appData.fixedRules.length === 0) {
+    rulesListEl.innerHTML = `<div class="empty-rules-msg">No custom fixed rules active. Add a rule above to fix slots or block periods.</div>`;
+    return;
+  }
+
+  appData.fixedRules.forEach(rule => {
+    const item = document.createElement("div");
+    item.className = `rule-item${rule.enabled ? "" : " disabled"}`;
+
+    const isFix = (rule.action === "FIX_SLOT" || rule.type === "FIX_SLOT");
+    const badgeHtml = isFix
+      ? `<span class="rule-action-badge action-fix">📌 Fix Slot</span>`
+      : `<span class="rule-action-badge action-block">⛔ Block Slot</span>`;
+
+    const dayText = (rule.day && rule.day !== "ANY") ? `📅 ${rule.day}` : `📅 Any Day`;
+    const timeText = (rule.timeSlot && rule.timeSlot !== "ANY") ? `⏰ ${rule.timeSlot}` : `⏰ Any Time`;
+    const roomText = (rule.room && rule.room !== "ANY") ? `🏢 ${rule.room}` : `🏢 Any Room`;
+
+    item.innerHTML = `
+      <div class="rule-info">
+        ${badgeHtml}
+        <span class="rule-target-chip">${escapeHtml(rule.targetLabel || rule.targetValue)}</span>
+        <span class="rule-meta-chip">${dayText}</span>
+        <span class="rule-meta-chip">${timeText}</span>
+        ${isFix ? `<span class="rule-meta-chip">${roomText}</span>` : ""}
+      </div>
+      <div class="rule-controls">
+        <label class="rule-toggle-label" title="${rule.enabled ? 'Click to disable rule' : 'Click to enable rule'}">
+          <input type="checkbox" class="rule-toggle-checkbox" data-rule-id="${rule.id}" ${rule.enabled ? "checked" : ""}>
+          <span>${rule.enabled ? "Active" : "Off"}</span>
+        </label>
+        <button type="button" class="btn-delete-rule" data-rule-id="${rule.id}" title="Delete Rule">🗑️</button>
+      </div>
+    `;
+
+    rulesListEl.appendChild(item);
+  });
+}
+
+function handleAddRule(e) {
+  e.preventDefault();
+  if (!appData) return;
+  if (!Array.isArray(appData.fixedRules)) appData.fixedRules = [];
+
+  const action = ruleActionInput.value;
+  const targetType = ruleTargetTypeInput.value;
+  const targetValue = ruleTargetValueInput.value;
+  const targetLabel = ruleTargetValueInput.options[ruleTargetValueInput.selectedIndex]?.text || targetValue;
+  const day = ruleDayInput.value;
+  const timeSlot = ruleTimeInput.value;
+  const room = ruleRoomInput.value;
+
+  if (action === "FIX_SLOT" && targetType === "room") {
+    showToast("⚠️ For 'Fix in Slot & Room', please select a Faculty Member, Batch, or Subject.", "warning");
+    return;
+  }
+
+  const newRule = {
+    id: "rule_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+    action: action,
+    type: action,
+    targetType: targetType,
+    targetValue: targetValue,
+    targetLabel: targetLabel,
+    day: day,
+    timeSlot: timeSlot,
+    room: room,
+    enabled: true,
+    createdAt: new Date().toISOString()
+  };
+
+  appData.fixedRules.push(newRule);
+  saveAppData();
+  renderRulesList();
+
+  showToast(`🔒 Fixed rule created: ${targetLabel} (${action === 'FIX_SLOT' ? 'Fixed' : 'Blocked'}). Click 'Generate Timetable' to apply.`, "success");
+}
+
+window.deleteRule = function(ruleId) {
+  if (!appData || !Array.isArray(appData.fixedRules)) return;
+  appData.fixedRules = appData.fixedRules.filter(x => x.id !== ruleId);
+  saveAppData();
+  renderRulesList();
+  showToast("Fixed rule deleted.", "info");
+};
+
+window.toggleRule = function(ruleId) {
+  if (!appData || !Array.isArray(appData.fixedRules)) return;
+  const r = appData.fixedRules.find(x => x.id === ruleId);
+  if (r) {
+    r.enabled = !r.enabled;
+    saveAppData();
+    renderRulesList();
+    showToast(`Rule ${r.enabled ? 'activated' : 'disabled'}. Click 'Generate Timetable' to update schedule.`, "info");
+  }
+};
+
 
 // -----------------------------------------------------------------------------
 // LOCAL STORAGE & DATA UTILITIES

@@ -2124,6 +2124,197 @@ body {
   border: 1px solid #c7d2fe;
 }
 
+/* ==============================================================================
+ * FIXED / EXCEPTION RULES BUILDER STYLES
+ * ============================================================================== */
+.card-fixed-rules {
+  grid-column: 1 / -1;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rules-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.rule-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease-in-out;
+}
+
+.rule-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.rule-item.disabled {
+  opacity: 0.55;
+  background: #f1f5f9;
+  border-style: dashed;
+}
+
+.rule-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.rule-action-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rule-action-badge.action-fix {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.rule-action-badge.action-block {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
+.rule-target-chip {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rule-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.rule-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* Rule Toggle Checkbox */
+.rule-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rule-toggle-checkbox {
+  cursor: pointer;
+  accent-color: var(--primary-color);
+  width: 15px;
+  height: 15px;
+}
+
+.btn-delete-rule {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.btn-delete-rule:hover {
+  color: #e11d48;
+  background: #ffe4e6;
+}
+
+.empty-rules-msg {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+/* Rule Fixed Pill on timetable cards */
+.rule-fixed-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.63rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+/* Blocked / Reserved Slots in Faculty / Room Views */
+.room-blocked-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  padding: 0.4rem 0.25rem;
+  border-radius: 6px;
+  border: 1px dashed #fca5a5;
+  background: #fff5f5;
+  transition: all 0.2s ease;
+}
+
+.room-blocked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  padding: 2px 7px;
+  border-radius: 9999px;
+}
+
 /* -----------------------------------------------------------------------------
  * Print Media Styles (Refined for Official Faculty of Technology Format)
  * ----------------------------------------------------------------------------- */

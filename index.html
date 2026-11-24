@@ -432,6 +432,91 @@
             </div>
           </div>
 
+          <!-- Panel 4: Fixed / Exception Rules -->
+          <div class="management-card card-fixed-rules">
+            <div class="card-header">
+              <div class="card-title-box">
+                <h4>🔒 Fixed / Exception Rules</h4>
+                <span class="badge-count" id="rulesCount">0</span>
+              </div>
+              <span class="rules-subtitle">Lock specific sessions into slots or block unavailable times</span>
+            </div>
+
+            <form id="formAddRule" class="management-form">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="ruleActionInput">Rule Action</label>
+                  <select id="ruleActionInput" class="custom-select" required>
+                    <option value="FIX_SLOT" selected>📌 Fix in Slot & Room</option>
+                    <option value="BLOCK_SLOT">⛔ Avoid / Block Slot</option>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="ruleTargetTypeInput">Target Type</label>
+                  <select id="ruleTargetTypeInput" class="custom-select" required>
+                    <option value="faculty" selected>👨‍🏫 Faculty Member</option>
+                    <option value="batch">👥 Batch / Section</option>
+                    <option value="subject">📚 Subject / Course</option>
+                    <option value="room">🏢 Classroom / Lab</option>
+                  </select>
+                </div>
+                <div class="form-group flex-2">
+                  <label for="ruleTargetValueInput" id="ruleTargetLabel">Target Entity</label>
+                  <select id="ruleTargetValueInput" class="custom-select" required>
+                    <!-- Populated dynamically via script.js -->
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="ruleDayInput">Day of Week</label>
+                  <select id="ruleDayInput" class="custom-select" required>
+                    <option value="Monday" selected>Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="ANY">Any Day</option>
+                  </select>
+                </div>
+
+                <div class="form-group flex-1">
+                  <label for="ruleTimeInput">Time Slot</label>
+                  <select id="ruleTimeInput" class="custom-select" required>
+                    <option value="09:00 AM - 10:00 AM" selected>09:00 AM - 10:00 AM</option>
+                    <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                    <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+                    <option value="12:00 PM - 01:00 PM">12:00 PM - 01:00 PM</option>
+                    <option value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
+                    <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
+                    <option value="03:00 PM - 04:00 PM">03:00 PM - 04:00 PM</option>
+                    <option value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
+                    <option value="ANY">Any Time</option>
+                  </select>
+                </div>
+
+                <div class="form-group flex-1">
+                  <label for="ruleRoomInput">Room / Facility</label>
+                  <select id="ruleRoomInput" class="custom-select" required>
+                    <option value="ANY" selected>Any Available Room</option>
+                    <!-- Populated dynamically via script.js -->
+                  </select>
+                </div>
+
+                <div class="form-group flex-1" style="align-self: flex-end;">
+                  <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Rule</button>
+                </div>
+              </div>
+            </form>
+
+            <div class="list-wrapper">
+              <div class="rules-list" id="rulesList">
+                <!-- Dynamically populated rules list -->
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
