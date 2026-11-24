@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>College Timetable Generator | ADA Project</title>
+  <title>Faculty of Technology Timetable | University of Delhi</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,17 +15,17 @@
   <header class="navbar">
     <div class="nav-left">
       <div class="logo-badge">
-        <span class="logo-icon">📅</span>
+        <span class="logo-icon">🏛️</span>
         <div>
-          <h1 class="logo-title">College Timetable Generator</h1>
-          <p class="logo-subtitle">Design & Analysis of Algorithms • Backtracking & Graph Coloring</p>
+          <h1 class="logo-title">Faculty of Technology Timetable</h1>
+          <p class="logo-subtitle">University of Delhi • Official Timetable Management</p>
         </div>
       </div>
     </div>
 
     <div class="nav-actions">
       <!-- Load DU FoT Demo Data Button -->
-      <button id="btnLoadDemo" class="btn btn-demo" title="Populate Faculty of Technology, DU 2nd Year Data">
+      <button id="btnLoadDemo" class="btn btn-demo" title="Populate Faculty of Technology, DU Timetable Data">
         <span class="btn-icon">🏛️</span>
         <span class="btn-text">Load DU FoT Demo Data</span>
       </button>
@@ -35,6 +35,19 @@
         <span class="btn-icon">⚡</span>
         <span class="btn-text">Generate Timetable</span>
       </button>
+
+      <!-- Export Timetable JSON Button -->
+      <button id="btnExportJson" class="btn btn-secondary" title="Export / Backup Custom Timetable JSON">
+        <span class="btn-icon">💾</span>
+        <span class="btn-text">Export JSON</span>
+      </button>
+
+      <!-- Import Timetable JSON Button -->
+      <button id="btnImportJson" class="btn btn-secondary" title="Import Timetable JSON Configuration">
+        <span class="btn-icon">📥</span>
+        <span class="btn-text">Import JSON</span>
+      </button>
+      <input type="file" id="fileImportJson" accept=".json" style="display: none;">
 
       <!-- Print Timetable -->
       <button id="btnPrint" class="btn btn-icon-only" title="Print / Export to PDF">
@@ -49,28 +62,179 @@
     <!-- Control Toolbar (Above Grid) -->
     <div class="table-toolbar">
       <div class="toolbar-left">
+        <!-- Semester Mode Toggle -->
         <div class="filter-group">
-          <label for="batchSelect" class="filter-label">Cohort / Batch:</label>
+          <label class="filter-label">Semester Mode:</label>
+          <div class="semester-toggle-group" id="semesterToggle">
+            <button type="button" class="btn-sem-toggle active" id="btnSemOdd" data-sem="odd">
+              <span class="sem-dot"></span> Odd Sem (Sem 1, 3, 5, 7)
+            </button>
+            <button type="button" class="btn-sem-toggle" id="btnSemEven" data-sem="even">
+              <span class="sem-dot"></span> Even Sem (Sem 2, 4, 6, 8)
+            </button>
+          </div>
+        </div>
+
+        <!-- View Mode Selector -->
+        <div class="filter-group">
+          <label for="viewModeSelect" class="filter-label">View Timetable By:</label>
           <div class="select-wrapper">
-            <select id="batchSelect" class="custom-select">
-              <option value="CSE-A" selected>Batch CSE-A (3rd Sem)</option>
-              <option value="CSE-B">Batch CSE-B (3rd Sem)</option>
-              <option value="EE-A">Batch EE-A (3rd Sem)</option>
-              <option value="ECE-A">Batch ECE-A (3rd Sem)</option>
-              <option value="ALL">All Batches (Combined View)</option>
+            <select id="viewModeSelect" class="custom-select">
+              <option value="batch" selected>👥 Batch / Section View</option>
+              <option value="faculty">👨‍🏫 Faculty Member View</option>
+              <option value="room">🏢 Room & Lab Occupancy View</option>
             </select>
           </div>
         </div>
 
+        <!-- Batch / Cohort Selector -->
+        <div class="filter-group" id="batchFilterGroup">
+          <label for="batchSelect" class="filter-label">Batch / Section:</label>
+          <div class="select-wrapper">
+            <select id="batchSelect" class="custom-select">
+              <option value="ALL">All Batches (Combined Campus View)</option>
+              <optgroup label="2nd Year Batches (3rd Sem)">
+                <option value="2nd Year CSE-A" selected>2nd Year CSE-A</option>
+                <option value="2nd Year CSE-B">2nd Year CSE-B</option>
+                <option value="2nd Year EE-A">2nd Year EE-A</option>
+                <option value="2nd Year EE-B">2nd Year EE-B</option>
+                <option value="2nd Year ECE-A">2nd Year ECE-A</option>
+                <option value="2nd Year ECE-B">2nd Year ECE-B</option>
+              </optgroup>
+              <optgroup label="1st Year Batches (1st Sem)">
+                <option value="1st Year CSE-A">1st Year CSE-A</option>
+                <option value="1st Year CSE-B">1st Year CSE-B</option>
+                <option value="1st Year EE-A">1st Year EE-A</option>
+                <option value="1st Year EE-B">1st Year EE-B</option>
+                <option value="1st Year ECE-A">1st Year ECE-A</option>
+                <option value="1st Year ECE-B">1st Year ECE-B</option>
+              </optgroup>
+              <optgroup label="3rd Year Batches (5th Sem)">
+                <option value="3rd Year CSE-A">3rd Year CSE-A</option>
+                <option value="3rd Year CSE-B">3rd Year CSE-B</option>
+                <option value="3rd Year EE">3rd Year EE</option>
+                <option value="3rd Year ECE-A">3rd Year ECE-A</option>
+                <option value="3rd Year ECE-B">3rd Year ECE-B</option>
+              </optgroup>
+              <optgroup label="4th Year Batches (7th Sem)">
+                <option value="4th Year CSE-A">4th Year CSE-A</option>
+                <option value="4th Year CSE-B">4th Year CSE-B</option>
+                <option value="4th Year EE">4th Year EE</option>
+                <option value="4th Year ECE-A">4th Year ECE-A</option>
+                <option value="4th Year ECE-B">4th Year ECE-B</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sub-Section / Group Filter -->
+        <div class="filter-group" id="subSectionFilterGroup">
+          <label for="subSectionSelect" class="filter-label">Group / Sub-Section:</label>
+          <div class="select-wrapper">
+            <select id="subSectionSelect" class="custom-select">
+              <option value="ALL" selected>All (Whole + Groups)</option>
+              <option value="A1">Group A1 / B1</option>
+              <option value="A2">Group A2 / B2</option>
+              <option value="WHOLE">Whole Section Only</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Faculty Member Selector (Faculty View) -->
+        <div class="filter-group" id="facultyFilterGroup" style="display: none;">
+          <label for="facultySelect" class="filter-label">Faculty Member:</label>
+          <div class="select-wrapper">
+            <select id="facultySelect" class="custom-select">
+              <!-- Dynamically populated from teachers data -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Room & Lab Facility Selector (Room Occupancy View) -->
+        <div class="filter-group" id="roomFilterGroup" style="display: none;">
+          <label for="roomSelect" class="filter-label">Room / Lab Facility:</label>
+          <div class="select-wrapper">
+            <select id="roomSelect" class="custom-select">
+              <!-- Dynamically populated from rooms data -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Search Input -->
         <div class="search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" placeholder="Filter by subject or teacher..." autocomplete="off">
+          <input type="text" id="searchInput" placeholder="Filter by subject, faculty, or room..." autocomplete="off">
         </div>
       </div>
 
       <div class="toolbar-right">
         <div class="info-tag">
           <span>🕒 <strong>Weekly Schedule:</strong> Monday – Friday (9:00 AM – 6:00 PM)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Status Bar & Actions (Above Timetable) -->
+    <div class="schedule-status-bar" id="scheduleStatusBar">
+      <div class="status-left">
+        <span class="status-indicator-dot" id="statusDot"></span>
+        <div class="status-text-group">
+          <span class="status-main" id="statusMainText">⚡ Conflict-Free Schedule Active</span>
+          <span class="status-sub" id="statusSubText">Checking allocations...</span>
+        </div>
+      </div>
+      <div class="status-actions">
+        <button type="button" class="btn-status-action btn-clear-pins" id="btnClearPins" title="Clear all pinned/locked slots for active semester" style="display: none;">
+          🔓 Clear Pins (<span id="pinnedCountText">0</span>)
+        </button>
+        <button type="button" class="btn-status-action" id="btnResetBatch" title="Clear and regenerate timetable for current active batch">
+          🔄 Reset Current Batch
+        </button>
+        <button type="button" class="btn-status-action btn-restore-demo" id="btnRestoreDemoInline" title="Reset all changes and restore official Faculty of Technology demo dataset">
+          🏛️ Restore FoT Demo
+        </button>
+      </div>
+    </div>
+
+    <!-- Feasibility & Conflict Diagnostics Alert (Hidden by default) -->
+    <div class="diagnostic-card" id="diagnosticCard" style="display: none;">
+      <div class="diagnostic-header">
+        <div class="diagnostic-title-group">
+          <span class="diagnostic-icon">⚠️</span>
+          <div>
+            <h4 class="diagnostic-title" id="diagnosticTitle">Schedule Feasibility & Bottleneck Diagnostics</h4>
+            <p class="diagnostic-subtitle" id="diagnosticSubtitle">The solver encountered scheduling bottlenecks in the current academic dataset</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close-diagnostic" id="btnCloseDiagnostic" title="Dismiss Alert">✕</button>
+      </div>
+      <div class="diagnostic-body" id="diagnosticBody">
+        <!-- Dynamically populated with actionable bottleneck recommendations -->
+      </div>
+    </div>
+
+    <!-- Dedicated Print Header (Only visible when printing or exporting to PDF) -->
+    <div class="print-only-header" id="printOnlyHeader">
+      <div class="print-header-top">
+        <h2>Faculty of Technology • University of Delhi</h2>
+        <p class="print-sub-heading">Official Academic Timetable & Course Allocation Sheet • Session 2026-27</p>
+      </div>
+      <div class="print-meta-grid">
+        <div class="print-meta-item">
+          <span class="meta-label">Semester Mode:</span>
+          <span class="meta-val" id="printSemesterVal">Odd Semester (Autumn)</span>
+        </div>
+        <div class="print-meta-item">
+          <span class="meta-label" id="printBatchLabel">Cohort / Class:</span>
+          <span class="meta-val" id="printBatchVal">2nd Year CSE-A</span>
+        </div>
+        <div class="print-meta-item">
+          <span class="meta-label" id="printSubSecLabel">Sub-Section Group:</span>
+          <span class="meta-val" id="printSubSecVal">All Groups (Whole Section + A1/A2)</span>
+        </div>
+        <div class="print-meta-item">
+          <span class="meta-label">Schedule Hours:</span>
+          <span class="meta-val">Monday – Friday (09:00 AM – 06:00 PM)</span>
         </div>
       </div>
     </div>
@@ -96,14 +260,6 @@
       </div>
     </div>
 
-    <!-- Subject Legend Bar -->
-    <div class="legend-card" id="legendContainer">
-      <h4 class="legend-title">Subject Legend & Faculty Directory</h4>
-      <div class="legend-pills" id="legendPills">
-        <!-- Dynamically rendered pills -->
-      </div>
-    </div>
-
     <!-- Inline Data Management Section (Teachers, Subjects, Rooms) -->
     <section class="management-section" id="dataManagementSection">
       <div class="management-header">
@@ -111,7 +267,7 @@
           <div class="management-icon">⚙️</div>
           <div>
             <h3 class="management-title">Data Management</h3>
-            <p class="management-subtitle">Configure teachers, subjects, and classrooms</p>
+            <p class="management-subtitle">Configure faculty members, subjects, practical sub-sections, and classrooms/labs</p>
           </div>
         </div>
         <button id="btnToggleManagement" class="btn btn-sm btn-secondary" title="Collapse / Expand Data Management">
@@ -134,15 +290,15 @@
             <form id="formAddTeacher" class="management-form">
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label for="teacherIdInput">ID / Code</label>
-                  <input type="text" id="teacherIdInput" placeholder="e.g. JJ" required maxlength="10">
+                  <label for="teacherIdInput">Acronym / Code</label>
+                  <input type="text" id="teacherIdInput" placeholder="e.g. ART or JJ" required maxlength="10">
                 </div>
                 <div class="form-group flex-2">
-                  <label for="teacherNameInput">Full Name</label>
-                  <input type="text" id="teacherNameInput" placeholder="e.g. Dr. Juhi Jain" required>
+                  <label for="teacherNameInput">Full Name & Title</label>
+                  <input type="text" id="teacherNameInput" placeholder="e.g. Dr. Anuradha Tomar" required>
                 </div>
               </div>
-              <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Teacher</button>
+              <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Faculty</button>
             </form>
 
             <div class="list-wrapper">
@@ -163,21 +319,70 @@
               <div class="form-row">
                 <div class="form-group flex-1">
                   <label for="subCodeInput">Subject Code</label>
-                  <input type="text" id="subCodeInput" placeholder="e.g. ADA" required maxlength="12">
+                  <input type="text" id="subCodeInput" placeholder="e.g. ADA or ADA (P)" required maxlength="16">
                 </div>
                 <div class="form-group flex-2">
                   <label for="subNameInput">Subject Name</label>
                   <input type="text" id="subNameInput" placeholder="e.g. Design & Analysis of Algorithms" required>
                 </div>
+                <div class="form-group flex-1">
+                  <label for="subSemesterInput">Semester</label>
+                  <select id="subSemesterInput" class="custom-select" required>
+                    <option value="odd" selected>Odd Semester</option>
+                    <option value="even">Even Semester</option>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="subTypeInput">Type (L-T-P)</label>
+                  <select id="subTypeInput" class="custom-select" required>
+                    <option value="L" selected>Theory (L)</option>
+                    <option value="T">Tutorial (T)</option>
+                    <option value="P">Practical Lab (P)</option>
+                  </select>
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label for="subBatchInput">Batch</label>
+                  <label for="subBatchInput">Batch / Section</label>
                   <select id="subBatchInput" class="custom-select" required>
-                    <option value="CSE-A">CSE-A</option>
-                    <option value="CSE-B">CSE-B</option>
-                    <option value="EE-A">EE-A</option>
-                    <option value="ECE-A">ECE-A</option>
+                    <optgroup label="2nd Year Batches">
+                      <option value="2nd Year CSE-A" selected>2nd Year CSE-A</option>
+                      <option value="2nd Year CSE-B">2nd Year CSE-B</option>
+                      <option value="2nd Year EE-A">2nd Year EE-A</option>
+                      <option value="2nd Year EE-B">2nd Year EE-B</option>
+                      <option value="2nd Year ECE-A">2nd Year ECE-A</option>
+                      <option value="2nd Year ECE-B">2nd Year ECE-B</option>
+                    </optgroup>
+                    <optgroup label="1st Year Batches">
+                      <option value="1st Year CSE-A">1st Year CSE-A</option>
+                      <option value="1st Year CSE-B">1st Year CSE-B</option>
+                      <option value="1st Year EE-A">1st Year EE-A</option>
+                      <option value="1st Year EE-B">1st Year EE-B</option>
+                      <option value="1st Year ECE-A">1st Year ECE-A</option>
+                      <option value="1st Year ECE-B">1st Year ECE-B</option>
+                    </optgroup>
+                    <optgroup label="3rd Year Batches">
+                      <option value="3rd Year CSE-A">3rd Year CSE-A</option>
+                      <option value="3rd Year CSE-B">3rd Year CSE-B</option>
+                      <option value="3rd Year EE">3rd Year EE</option>
+                      <option value="3rd Year ECE-A">3rd Year ECE-A</option>
+                      <option value="3rd Year ECE-B">3rd Year ECE-B</option>
+                    </optgroup>
+                    <optgroup label="4th Year Batches">
+                      <option value="4th Year CSE-A">4th Year CSE-A</option>
+                      <option value="4th Year CSE-B">4th Year CSE-B</option>
+                      <option value="4th Year EE">4th Year EE</option>
+                      <option value="4th Year ECE-A">4th Year ECE-A</option>
+                      <option value="4th Year ECE-B">4th Year ECE-B</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="subSectionInput">Sub-Section</label>
+                  <select id="subSectionInput" class="custom-select" required>
+                    <option value="All" selected>Whole Section</option>
+                    <option value="A1">Group A1 / B1</option>
+                    <option value="A2">Group A2 / B2</option>
                   </select>
                 </div>
                 <div class="form-group flex-2">
@@ -185,8 +390,12 @@
                   <select id="subTeacherInput" class="custom-select" required></select>
                 </div>
                 <div class="form-group flex-1">
-                  <label for="subLecturesInput">Classes/Wk</label>
-                  <input type="number" id="subLecturesInput" value="4" min="1" max="8" required>
+                  <label for="subDurationInput">Duration</label>
+                  <input type="number" id="subDurationInput" value="1" min="1" max="4" title="Duration in consecutive hours" required>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="subLecturesInput">Sessions/Wk</label>
+                  <input type="number" id="subLecturesInput" value="3" min="1" max="8" title="Number of weekly sessions" required>
                 </div>
               </div>
               <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Subject</button>
@@ -197,7 +406,7 @@
             </div>
           </div>
 
-          <!-- Panel 3: Classrooms -->
+          <!-- Panel 3: Classrooms & Labs -->
           <div class="management-card">
             <div class="card-header">
               <div class="card-title-box">
@@ -209,8 +418,8 @@
             <form id="formAddRoom" class="management-form">
               <div class="form-row">
                 <div class="form-group flex-2">
-                  <label for="roomNameInput">Room Identifier</label>
-                  <input type="text" id="roomNameInput" placeholder="e.g. 314 or Basement Lab" required>
+                  <label for="roomNameInput">Room / Lab Identifier</label>
+                  <input type="text" id="roomNameInput" placeholder="e.g. Basement Lab, 214, R1..." required>
                 </div>
                 <div class="form-group flex-1" style="align-self: flex-end;">
                   <button type="submit" class="btn btn-sm btn-primary w-100">+ Add Room</button>
@@ -227,6 +436,83 @@
       </div>
     </section>
 
+    <!-- Course & Weekly Load Summary Panel (L-T-P Breakdown) -->
+    <section class="summary-section" id="loadSummarySection">
+      <div class="summary-card">
+        <div class="summary-header">
+          <div class="summary-title-group">
+            <div class="summary-icon">📊</div>
+            <div>
+              <h3 class="summary-title" id="summaryTitle">Course & Weekly Load Summary</h3>
+              <p class="summary-subtitle" id="summarySubtitle">Weekly academic hour distribution (L-T-P breakdown) across courses</p>
+            </div>
+          </div>
+          <div class="summary-badges">
+            <span class="load-badge badge-courses" id="totalCoursesBadge">0 Courses</span>
+            <span class="load-badge badge-hours" id="totalHoursBadge">0 Contact Hrs / Week</span>
+          </div>
+        </div>
+        <div class="summary-table-wrapper">
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th style="width: 14%;">Course Code</th>
+                <th style="width: 28%;">Course Name</th>
+                <th style="width: 26%;">Faculty In-Charge</th>
+                <th class="text-center" style="width: 8%;" title="Lectures per week">L (Lectures)</th>
+                <th class="text-center" style="width: 8%;" title="Tutorials per week">T (Tutorials)</th>
+                <th class="text-center" style="width: 8%;" title="Practicals / Labs per week">P (Practicals)</th>
+                <th class="text-center" style="width: 8%;" title="Total Weekly Hours">Total / Wk</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTableBody">
+              <!-- Dynamically rendered via script.js -->
+            </tbody>
+            <tfoot id="summaryTableFoot">
+              <!-- Summary row dynamically rendered via script.js -->
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subject Legend & Faculty Directory Section -->
+    <section class="legend-section" id="legendSection">
+      <div class="legend-card" id="legendContainer">
+        <div class="legend-header">
+          <div class="legend-title-group">
+            <div class="legend-icon">📖</div>
+            <div>
+              <h3 class="legend-title">Subject Legend & Faculty Directory</h3>
+              <p class="legend-subtitle">Course curriculum, lab sub-sections (A1/A2, B1/B2), and faculty allocations organized by class and semester</p>
+            </div>
+          </div>
+          <div class="legend-controls">
+            <!-- View Mode Tabs -->
+            <div class="legend-tab-group" id="legendTabGroup">
+              <button type="button" class="btn-legend-tab active" id="tabActiveBatch" data-view="batch">
+                🎯 Active Batch
+              </button>
+              <button type="button" class="btn-legend-tab" id="tabAllClasses" data-view="classes">
+                📚 All Classes by Semester
+              </button>
+              <button type="button" class="btn-legend-tab" id="tabFacultyDir" data-view="faculty">
+                👨‍🏫 Faculty Directory
+              </button>
+            </div>
+            <!-- Legend Search Box -->
+            <div class="legend-search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="legendSearchInput" placeholder="Filter subjects or faculty..." autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="legend-body" id="legendBody">
+          <!-- Dynamically populated via script.js -->
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Toast Notification Container -->
@@ -237,7 +523,7 @@
     <div class="spinner-box">
       <div class="spinner"></div>
       <h3 id="loadingText">Generating Conflict-Free Timetable...</h3>
-      <p>Running Graph Coloring & Backtracking Solver in Browser</p>
+      <p>Optimizing Academic Schedules & Room Allocations</p>
     </div>
   </div>
 

@@ -1,32 +1,38 @@
-# 🎓 College Timetable Generator
-> **Design and Analysis of Algorithms (ADA) Project • B.Tech CSE (3rd Semester)**  
-> Built with **Graph Coloring & Recursive Backtracking** running 100% client-side in vanilla JavaScript, HTML5, and CSS3.  
+# 🏛️ Faculty of Technology Timetable (University of Delhi)
+> **Design and Analysis of Algorithms (ADA) Project • B.Tech (University of Delhi, FoT)**  
+> Built with **Graph Coloring & Backtracking Solver** running 100% client-side in vanilla JavaScript, HTML5, and CSS3.  
 > ⚡ **Vercel & Static Host Ready**: Zero backend required. Simply open `index.html` or deploy directly to Vercel, Netlify, or GitHub Pages.
 
 ---
 
-## 🏛️ Project Architecture
+## 🏛️ Project Architecture & Features
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        Standalone Client-Side                          │
-│               index.html • style.css • script.js                       │
+│               index.html • style.css • script.js • data.json           │
 ├────────────────────────────────────────────────────────────────────────┤
-│ 1. The Core UI:                                                        │
-│    - Full-Week Grid (Monday–Friday, 9:00 AM – 6:00 PM)                 │
-│    - Dedicated Lunch Break / Recess row (1:00 PM – 2:00 PM)            │
-│    - Batch Selector (CSE-A / CSE-B / All Batches)                      │
-│    - Live Search & Color-coded Subject Badges                          │
+│ 1. Complete DU Faculty of Technology Dataset:                          │
+│    - 22 Batches: 1st, 2nd, 3rd, and 4th Year across CSE, ECE, and EE   │
+│    - 53 Faculty Members with official acronyms and full titles         │
+│    - 23 Classrooms & Specialized Labs (Basement Lab, R1, 513, etc.)    │
+│    - Support for Sub-Sections / Groups: A1 vs A2, B1 vs B2, & Whole    │
 │                                                                        │
 │ 2. The In-Browser Brain (Graph Coloring Solver):                       │
 │    - Graph Vertex Coloring Constraint Satisfaction                     │
 │    - Welsh-Powell Degree Ordering Heuristic (Most Constrained First)   │
-│    - Recursive Backtracking with Adaptive Pruning                      │
-│    - Solves 38 weekly lectures in < 15 milliseconds                    │
+│    - Sub-Section Mutual Exclusion & Parallel Lab Scheduling:           │
+│      * A1 and A2 can run in parallel if rooms and teachers differ.    │
+│      * Whole section ("All") blocks all sub-sections for that batch.   │
+│      * Same teacher or same room prevents parallel scheduling.         │
+│    - Randomized Timeslot Shuffling for balanced weekly distribution     │
+│    - Solves hundreds of lecture vertices in < 60 milliseconds          │
 │                                                                        │
-│ 3. Client Storage & Persistence:                                       │
-│    - Hardcoded Delhi University (FoT) 2nd-Year Demo Data               │
-│    - LocalStorage persistence for user edits (Teachers, Subjects, etc.)│
+│ 3. Client Storage & Interactive Management:                            │
+│    - One-click "Load DU FoT Demo Data" button                          │
+│    - Sub-Section Filter: Whole Section, Group A1/B1, Group A2/B2, All │
+│    - Inline Data Management for Faculty, Subjects, and Rooms           │
+│    - LocalStorage persistence for user additions & edits               │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -40,7 +46,7 @@ The timetable generator will open and work immediately with zero configuration!
 
 ### Option 2: Run with a Local Static Server (VS Code / Python)
 ```bash
-# Using Python's built-in static server (no Flask needed):
+# Using Python's built-in static server:
 python -m http.server 3000
 ```
 Then visit: `http://localhost:3000`
@@ -49,53 +55,69 @@ Then visit: `http://localhost:3000`
 
 ## ☁️ Deploying to Vercel (1-Click)
 
-Because the project is now 100% static client-side:
+Because the project is 100% static client-side:
 1. Push this folder to a GitHub repository.
 2. In [Vercel](https://vercel.com), click **Add New Project** and import your repository.
-3. Keep the default settings (Framework Preset: **Other**, Root Directory: `./`).
-4. Click **Deploy**. Your college timetable generator will be live worldwide in seconds!
-
-> [!TIP]
-> You can safely delete `app.py`, `algorithm.cpp`, `algorithm.exe`, and `data.json`. The application only requires `index.html`, `style.css`, and `script.js` to run completely!
+3. Keep default settings (Framework Preset: **Other**, Root Directory: `./`).
+4. Click **Deploy**. Your timetable generator will be live worldwide in seconds!
 
 ---
 
-## 🏫 Hardcoded DU FoT 2nd-Year Demo Data
+## 👥 Faculty Directory (53 Faculty Members)
 
-| Cohort | Subject Code | Subject Name | Faculty Name & Code | Weekly Lectures |
-| :--- | :--- | :--- | :--- | :---: |
-| **CSE-A** | `ADA` | Design & Analysis of Algorithms | Dr. Juhi Jain (`JJ`) | 4 |
-| **CSE-A** | `DBMS` | Database Management Systems | Dr. Geetanjali Bhola (`GB`) | 4 |
-| **CSE-A** | `DSD` | Digital System Design | Dr. Bhawna Rawat (`BR`) | 4 |
-| **CSE-A** | `PSCS-A` | Probability & Statistics for CS | Dr. Ahmad Zaman Khan (`AZK`) | 3 |
-| **CSE-A** | `EVS-2` | Environmental Science - II | Dr. Udita Sharma (`UDS`) | 2 |
-| **CSE-A** | `FIT INDIA`| Fit India Movement | Dr. Ashutosh Pandey (`AP`) | 1 |
-| **CSE-B** | `ADA` | Design & Analysis of Algorithms | Dr. Juhi Jain (`JJ`) | 4 |
-| **CSE-B** | `DBMS` | Database Management Systems | Dr. Geetanjali Bhola (`GB`) | 4 |
-| **CSE-B** | `DSD` | Digital System Design | Dr. Bhawna Rawat (`BR`) | 4 |
-| **CSE-B** | `PSCS-B` | Probability & Statistics for CS | Dr. Ahmad Zaman Khan (`AZK`) | 3 |
-| **CSE-B** | `FSS` | Full Stack Specialization | Mr. Ajay Kumar Sahu (`AKS`) | 2 |
-| **CSE-B** | `EVS-2` | Environmental Science - II | Dr. Eklavya (`EKL`) | 2 |
-| **CSE-B** | `FIT INDIA`| Fit India Movement | Dr. Ahmad Zaman Khan (`AZK`) | 1 |
-
-**Rooms Available**: `R1`, `R2`, `R3`, `214`, `313`, `314`, `513`, `Basement Lab`.
+| Acronym | Faculty Member | Acronym | Faculty Member |
+| :--- | :--- | :--- | :--- |
+| `ART` | Dr. Anuradha Tomar | `AT` | Dr. Arjun Tyagi |
+| `JP` | Dr. Jeetendra Prasad | `RR` | Dr. Rekha R. |
+| `AKS` | Mr. Ajay Kumar Sahu | `AP` | Dr. Ashutosh Pandey |
+| `VKG` | Dr. Vikram Kumar Gedi | `PT` | Dr. Pratima |
+| `MS` | Ms. Manisha Singh | `AK` | Dr. Amit Kumar |
+| `RH` | Ms. Reha | `UJS` | Dr. Ujjal Sur |
+| `DP` | Dr. Deepika | `GB` | Ms. Geetanjali Bhola |
+| `KJ` | Dr. Kajal Kumari | `VA` | Dr. Vijay Azad |
+| `VK` | Dr. Vandana Kumari | `TK` | Ms. Tanya Khaneja |
+| `TNK` | Ms. Tanishka | `KJL` | Dr. Kajol |
+| `VJ` | Prof. Vanita Jain | `SJY` | Dr. Sanjeev Yadav |
+| `RHS` | Dr. Rahul Solanki | `ANJ` | Dr. Anuj Kumar |
+| `ANK` | Dr. Ankit | `SY` | Dr. Sangeeta Yadav |
+| `BR` | Dr. Bhawna Rawat | `AKG` | Dr. Ajay Kumar Gupta |
+| `GS` | Dr. Gurinder Singh | `SW` | Dr. Sweta Rani |
+| `JJ` | Dr. Juhi Jain | `JS` | Dr. Jatin Sharma |
+| `US` | Mr. Unmesh Shukla | `UK` | Dr. Utkarsh |
+| `RTS` | Ms. Ritika Sharma | `MV` | Dr. Manu Vardhan |
+| `DRS` | Dr. Diptiranjan Samantray | `DRB` | Prof. D.R. Bhaskar |
+| `EKL` | Dr. Eklavya | `PKS` | Prof. P.K. Singh |
+| `BA` | Prof. Bhawna Agrawal | `RJS` | Dr. Ranjeet Singh |
+| `SNK` | Ms. Shivani Kumari | `RS` | Prof. Raj Senani |
+| `KS` | Dr. Khushwant Sehra | `VS` | Dr. Varun Saxena |
+| `GSC` | Prof. G.S. Chilana | `SK` | Dr. Sunil Kumar |
+| `AZK` | Dr. Ahmad Zaman Khan | `UDS` | Dr. Udita Sharma |
+| `SG` | Dr. Shubham Gupta | `AKT` | Prof. A.K. Tandon |
+| `SMT` | Dr. Sumit | | |
 
 ---
 
-## 🧠 ADA Algorithm & Theory Guide (For Viva & Exams)
+## 🏢 Classrooms & Specialized Labs (23 Rooms)
+`Basement Lab`, `R1`, `R2`, `R3`, `G01`, `203`, `204`, `211`, `212`, `213`, `214`, `216`, `217`, `219`, `303`, `304`, `311`, `312`, `313`, `314`, `317`, `503`, `513`.
 
-### 1. Problem Formulation as Graph Vertex Coloring
-University Timetabling is an NP-Complete problem. We model it as Graph Coloring $G = (V, E)$:
-- **Vertices ($V = 38$):** Every individual lecture session in a week.
-- **Edges ($E$ Conflicts):** An undirected edge exists if:
-  1. *Batch Conflict:* Two lectures belong to the same batch (students cannot attend two classes at once).
-  2. *Teacher Conflict:* Two lectures have the same faculty (Dr. Juhi Jain cannot teach CSE-A and CSE-B simultaneously).
-- **Colors ($K = 40$):** Discrete time slots ($5 \text{ days} \times 8 \text{ periods}$).
-- **Room Collision Constraint:** No two lectures in the same timeslot can share a physical classroom.
+---
 
-### 2. Welsh-Powell Degree Ordering Heuristic
-Standard backtracking has worst-case time complexity $O(K^V)$.
-By sorting vertices in **descending order of degree** (number of conflict edges):
-- Highly constrained faculty (like Dr. Juhi Jain or Dr. Ahmad Zaman Khan who teach multiple batches) are scheduled first.
-- Infeasible subtrees are pruned at the very top of the search tree.
-- Result: **Execution finishes in < 15 ms in pure JavaScript!**
+## 🧠 Sub-Section Graph Coloring & Backtracking Logic (For Viva & Exams)
+
+### 1. Graph Model $G = (V, E)$
+- **Vertices ($V$):** Each weekly lecture or practical lab session.
+- **Edges ($E$ - Conflict Matrix `adj[i][j]`):**
+  1. **Teacher Conflict:** `lectures[i].teacherId === lectures[j].teacherId` (a professor cannot teach two batches at once).
+  2. **Cohort Conflict:**
+     - If both belong to the same parent batch (e.g. `2nd Year CSE-A`):
+       - If either is `subSection: "All"`, all students must attend, so an edge is formed with every class of that batch.
+       - If both share the same sub-section (`A1` vs `A1`, or `B1` vs `B1`), students cannot be in two places at once $\rightarrow$ edge formed.
+       - If they are disjoint sub-sections (`A1` vs `A2`): **NO edge is formed**.
+  3. **Room Conflict:** Enforced inside `isSafe()` — two classes cannot occupy the same classroom/lab at the same time slot.
+
+### 2. Parallel Practical Scheduling
+Because `adj[A1][A2] = 0`, the solver allows group `A1` (e.g. `DSD (P)` in `Basement Lab` with Dr. Bhawna Rawat) and group `A2` (e.g. `DBMS (P)` in `R1` with Ms. Geetanjali Bhola) to be scheduled in the **same timeslot** whenever different teachers and rooms are available.
+
+### 3. Welsh-Powell Degree Ordering & Timeslot Shuffling
+- Vertices are sorted in descending order of degree (most constrained faculty and whole-class lectures first).
+- Available timeslots and rooms are randomized (shuffled) before each assignment branch to prevent morning clustering and ensure natural distribution across Monday to Friday.
